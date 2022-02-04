@@ -1,7 +1,11 @@
 <!DOCTYPE HTML> 
 <html lang="en"> 
 <head>
-<title>Hello Animation</title>
+<title>Ge Yuhao's Animation</title>
+<link href="src/mp1.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Tangerine" rel="stylesheet">
+<link rel="icon_myself" href="src/icon.png">
+<meta name="author" content="Yuhao Ge">
 <meta charset="utf-8"> 
 </head>
  
@@ -38,16 +42,18 @@
     }
 </script>
 
-<script src="gl-matrix-min.js"></script>  
-<script src="mp1.js"></script>  
+<script src="./src/gl-matrix-min.js"></script>  
+<script src="./src/mp1.js"></script>  
 
 <body onload="startup();">
+
+  <h1>MP1: Dancing Logo for CS 418</h1>
+  <h3>By Ge Yuhao</p>
   <canvas id="myGLCanvas" width="500" height="500"></canvas>
-</body>
 
 <p>Animation settings:</p>
 <div>
-  <input type="range" id="speed" name="speed" min="0" max="100" value="5">
+  <input type="range" id="speed" name="speed" min="0" max="100" value="40">
   <label for="speed">Rotation speed</label>
 </div>
 
@@ -62,9 +68,8 @@
 <label for="MyAnimation">ZJU Eagle </label>
 </div>
 
-<div>
-<input type="button" id="button" value="Click Here!">
-</div>
+<p>After selecting ZJU Eagle, click the button to see the transition animation</p>
+<button type="button" id="button">Click Me!</button>
 
-
+</body>
 </html>

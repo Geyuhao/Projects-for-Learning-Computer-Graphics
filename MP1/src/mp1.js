@@ -1,8 +1,10 @@
 /**
  * @file A simple WebGL example drawing a triangle with colors
  * @author Eric Shaffer <shaffer1@eillinois.edu>
- * 
  * Updated Spring 2021 to use WebGL 2.0 and GLSL 3.00
+ * 
+ * @author Ge Yuhao <Yuhaoge2z@illinois.edu>
+ * Modified Spring 2022 to finish the MP1 of CS 418
  */
 
 /** @global The WebGL context */
@@ -36,12 +38,14 @@ var previousTime = 0;
 var pointOffset = [0.0, 0.0, 0.0];
 var fly_offset = [0.0, 0.0, 0.0];
 
-/** @global  Used to check if the select button is used */
+/** @global  Used to check which select button is used */
 var old_which = 1;
 var which = 1;
 
+/** @global Value between 0-1, used to denote the frame number of transfer animation */
 var frame = 0;
 
+/** @global Check if the transfer animation should start */
 var start = false;
 
 
@@ -144,10 +148,15 @@ function setupShaders() {
     gl.getUniformLocation(shaderProgram, "uModelViewMatrix");
 }
 
-var a = 1;
 
+
+/**
+ * Create the vertices for the picture
+ * @param {Number} choose "1" means drawing the "I" symbol.
+ * @return {list} The vertices' coordinates
+ */
 function create_vertices(choose){
-  // Define a triangle in clip coordinates.
+  // Define triangles in clip coordinates.
   if (choose == 1){
     var vertices = [
           -0.5, 0.6, 1.0,
@@ -182,7 +191,7 @@ function create_vertices(choose){
           0.2,-0.4, 1.0,
           -0.2, 0.4, 1.0,
     ];
-  } else{               // used for my own animation
+  } else{               // Define triangles for use of my own animation
     var vertices = [
           0.0, 0.7, 1.0,
           0.1, 0.55, 1.0,
@@ -238,6 +247,7 @@ function create_vertices(choose){
         0.65,0.6, 1.0,
     ]
 
+    // Update the vertices according to the frame number
     vertices = trans_pic(vertices,frame);
 
     // Add the wing of the eagle
@@ -280,7 +290,7 @@ function create_vertices(choose){
       vertices.push(1.0);
     }
 
-    // symetric
+    // do the symetric
     var length = vertices.length/3;
     for (i=3*13; i<length; i++){
       vertices.push(-vertices[i*3]);
@@ -299,9 +309,14 @@ function create_vertices(choose){
 }
 
 
-// frame is in 0 - 1
+/**
+ * Create the vertices for the picture
+ * @param {Number} frame Denote which stage the transition have arrived
+ * @return {list} The vertices' coordinates
+ */
 function trans_pic(vertices_initial, frame){
   mid_vertices = []
+  // Final position of all vertices
   var vertices_final = [
     0.0, 0.6, 1.0,
     0.1, 0.6, 1.0,
@@ -344,6 +359,7 @@ function trans_pic(vertices_initial, frame){
     0.5, 0.4, 1.0
 ]
 
+  // calculate the middle position according to the frame number
   for (var i=0; i<vertices_initial.length/3; i++){
     point1 = [vertices_initial[3*i],vertices_initial[3*i+1]];
     point2 = [vertices_final[3*i],vertices_final[3*i+1]];
@@ -393,6 +409,7 @@ function setupBuffers() {
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
   var colors = [];
 
+  // Define color for the UIUC LOGO
   if (which == 1){
     for (var i=0; i<vertices.length; i++){ 
       colors.push((14*16+1)/256);
@@ -400,13 +417,13 @@ function setupBuffers() {
       colors.push((2*16+5)/256);
       colors.push(1.0);
     }
-  } else{
+  } else{   // Define color fot the ZJU Logo
     for (var i=0; i<vertices.length; i++){
 
       start_rgb = [0.0,(4*16+12)/256,(9*16+12)/256];
       end_rgb = [(14*16+1)/256,(4*16+7)/256,(2*16+5)/256];
 
-
+      // calculate the middle stage of the color during the trainsition
       r = start_rgb[0] + frame * (end_rgb[0] - start_rgb[0]);
       g = start_rgb[1] + frame * (end_rgb[1] - start_rgb[1]);
       b = start_rgb[2] + frame * (end_rgb[2] - start_rgb[2]);
@@ -512,8 +529,8 @@ function draw() {
     start = false;
   }
 
-
-  document.getElementById("button").onclick=function(){start = true};
+  document.getElementById("button").addEventListener('click', function(){start = true}, false);
+  // document.getElementById("button").onclick=function(){start = true};
   if (start == true){
     rotAngle += speed * deltaTime;
   } else {
@@ -526,7 +543,7 @@ function draw() {
     frame = 1;
   }
 
-
+  // Use offset to realise the motion of wings
   fly_offset = [-frame, 0.03*Math.sin(frame*30), 0];
 
   setupBuffers();     
@@ -562,7 +579,9 @@ function draw() {
  }
 
 
-
+/**
+ * read the button status to decide which picture to draw
+ */
  function test(){
    // Check the status of the button
   if (document.getElementById("I").checked == true && old_which == 1){
@@ -587,6 +606,7 @@ function draw() {
       console.log("ERROR with the check button");
   }
 
+  // Initialize the all the parameters
   if (change == 1){  // true means there is a change in the check button
     rotAngle = 0; 
     start = false;
@@ -594,6 +614,7 @@ function draw() {
     pointOffset = [0,0,0];
     modelViewMatrix  = glMatrix.mat4.create();
   }
+
   if (which == 1){    // 1 means the I logo
     requestAnimationFrame(animate);
   } else if (which == 0){   // 0 means my own animation
