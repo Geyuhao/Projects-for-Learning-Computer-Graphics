@@ -622,8 +622,17 @@ function draw() {
   }
  }
 
-
-
+/**
+ * Ask the user to give feedback
+ */
+// function ask_input(){
+//   document.getElementById("submit").addEventListener('click', function()
+//   {
+//     var output = document.getElementById("text").value;
+//     console.log(output);
+//     document.getElementById('text').value='';
+//   }, false)
+// }
 
 
 /**
@@ -637,5 +646,6 @@ function draw() {
   setupBuffers();
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   requestAnimationFrame(animate); 
+  // ask_input();
 }
 
