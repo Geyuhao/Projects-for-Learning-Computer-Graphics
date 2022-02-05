@@ -48,7 +48,8 @@ var frame = 0;
 /** @global Check if the transfer animation should start */
 var start = false;
 
-
+/** @global UIUC motion type*/
+var mo_type = 0;
 
 /**
  * Translates degrees to radians
@@ -495,10 +496,32 @@ function draw() {
   rotAngle += speed * deltaTime;
   if (rotAngle > 360.0)
       rotAngle = 0.0;
+  
 
-  modelViewMatrix = matrix1(rotAngle);
-  // pointOffset = [(Math.abs(rotAngle-180)-90)/180, Math.sin(rotAngle*2*Math.PI/120)/2,1];
 
+  document.getElementById("submit1").addEventListener('click', function()
+  {
+    if (mo_type==0){
+      mo_type = 1;
+    } 
+    rotAngle = 0; 
+  }, false);
+
+  document.getElementById("submit2").addEventListener('click', function()
+  {
+    if (mo_type==1){
+      mo_type = 0;
+    } 
+    rotAngle = 0; 
+  }, false);
+
+  if (mo_type == 1){
+    pointOffset = [(Math.abs(rotAngle-180)-90)/180, Math.sin(rotAngle*Math.PI/30)/6,1];
+    modelViewMatrix = glMatrix.mat4.create();;
+  } else{
+    pointOffset = [0,0,1];
+    modelViewMatrix  = matrix1(rotAngle);
+  }
   setupBuffers();     
 
   // Draw the frame.
@@ -530,7 +553,6 @@ function draw() {
   }
 
   document.getElementById("button").addEventListener('click', function(){start = true}, false);
-  // document.getElementById("button").onclick=function(){start = true};
   if (start == true){
     rotAngle += speed * deltaTime;
   } else {
@@ -545,6 +567,7 @@ function draw() {
 
   // Use offset to realise the motion of wings
   fly_offset = [-frame, 0.03*Math.sin(frame*30), 0];
+  pointOffset = [0,frame/2-0.2,1];
 
   setupBuffers();     
 
@@ -572,7 +595,7 @@ function draw() {
                                         0, 0, 1, 0, 
                                         0, 0, 0, 1)
   glMatrix.mat4.fromZRotation(modelViewMatrix1, degToRad(rotAngle));
-  glMatrix.mat4.fromScaling(modelViewMatrix2, [(rotAngle-180)/180,(rotAngle-180)/180,1]);
+  glMatrix.mat4.fromScaling(modelViewMatrix2, [Math.abs(rotAngle-180)/360+0.5,Math.abs(rotAngle-180)/360+0.5,1]);
   glMatrix.mat4.multiply(modelViewMatrix3,modelViewMatrix1,modelViewMatrix2);
   glMatrix.mat4.multiply(modelViewMatrix4,modelViewMatrix3,new_matrix);
   return modelViewMatrix3;
