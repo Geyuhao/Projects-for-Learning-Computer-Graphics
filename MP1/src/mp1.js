@@ -45,11 +45,6 @@ var which = 1;
 /** @global Value between 0-1, used to denote the frame number of transfer animation */
 var frame = 0;
 
-/** @global Check if the transfer animation should start */
-var start = false;
-
-/** @global UIUC motion type*/
-var mo_type = 0;
 
 /**
  * Translates degrees to radians
@@ -496,32 +491,18 @@ function draw() {
   rotAngle += speed * deltaTime;
   if (rotAngle > 360.0)
       rotAngle = 0.0;
-  
 
+  pointOffset = [1.5*(Math.abs(rotAngle-180)-90)/180, Math.sin(rotAngle*Math.PI/30)/6,1];
 
-  document.getElementById("submit1").addEventListener('click', function()
-  {
-    if (mo_type==0){
-      mo_type = 1;
-    } 
-    rotAngle = 0; 
-  }, false);
+  var tran_matrix_in = glMatrix.mat4.create(); 
+  var tran_matrix_ou = glMatrix.mat4.create(); 
+  glMatrix.mat4.fromTranslation(tran_matrix_in, pointOffset);
+  glMatrix.mat4.invert(tran_matrix_ou, tran_matrix_in);
 
-  document.getElementById("submit2").addEventListener('click', function()
-  {
-    if (mo_type==1){
-      mo_type = 0;
-    } 
-    rotAngle = 0; 
-  }, false);
+  modelViewMatrix = matrix1(rotAngle*2);
+  glMatrix.mat4.multiply(modelViewMatrix,modelViewMatrix,tran_matrix_ou);
+  glMatrix.mat4.multiply(modelViewMatrix,tran_matrix_in,modelViewMatrix);
 
-  if (mo_type == 1){
-    pointOffset = [(Math.abs(rotAngle-180)-90)/180, Math.sin(rotAngle*Math.PI/30)/6,1];
-    modelViewMatrix = glMatrix.mat4.create();;
-  } else{
-    pointOffset = [0,0,1];
-    modelViewMatrix  = matrix1(rotAngle);
-  }
   setupBuffers();     
 
   // Draw the frame.
@@ -546,28 +527,29 @@ function draw() {
   // Remember the current time for the next frame.
   previousTime = currentTime;
      
+
+  var wait_time = 90;
   // Update geometry to rotate 'speed' degrees per second.
-  if (rotAngle > 480.0){
+  if (rotAngle > 720+wait_time*2){
     rotAngle = 0.0;
     start = false;
   }
 
-  document.getElementById("button").addEventListener('click', function(){start = true}, false);
-  if (start == true){
-    rotAngle += speed * deltaTime;
-  } else {
-    rotAngle = 0;
-  }
+  rotAngle += speed * deltaTime;
 
-  if(rotAngle<360){
-    frame = rotAngle/360; 
-  } else{
+  if(rotAngle<wait_time){
+    frame = 0; 
+  } else if (rotAngle<360+wait_time){
+    frame = (rotAngle-wait_time)/360; 
+  } else if(rotAngle<360+2*wait_time) {
     frame = 1;
+  } else{
+    frame = 1 - (rotAngle-2*wait_time-360)/360;
   }
 
   // Use offset to realise the motion of wings
   fly_offset = [-frame, 0.03*Math.sin(frame*30), 0];
-  pointOffset = [0,frame/2-0.2,1];
+  // pointOffset = [0,frame/2-0.2,1];
 
   setupBuffers();     
 
@@ -593,9 +575,15 @@ function draw() {
   new_matrix = glMatrix.mat4.fromValues(1, 0, 0, 0, 
                                         0, 1, 0, 0, 
                                         0, 0, 1, 0, 
-                                        0, 0, 0, 1)
-  glMatrix.mat4.fromZRotation(modelViewMatrix1, degToRad(rotAngle));
-  glMatrix.mat4.fromScaling(modelViewMatrix2, [Math.abs(rotAngle-180)/360+0.5,Math.abs(rotAngle-180)/360+0.5,1]);
+                                        0, 0, 0, 1);
+
+  if (rotAngle < 360){
+    glMatrix.mat4.fromZRotation(modelViewMatrix1, degToRad(rotAngle%360));
+  } else{
+    glMatrix.mat4.fromZRotation(modelViewMatrix1, degToRad(-rotAngle%360));
+  }
+
+  glMatrix.mat4.fromScaling(modelViewMatrix2, [-Math.abs(rotAngle%360-180)/360+1,-Math.abs(rotAngle%360-180)/360+1,1]);
   glMatrix.mat4.multiply(modelViewMatrix3,modelViewMatrix1,modelViewMatrix2);
   glMatrix.mat4.multiply(modelViewMatrix4,modelViewMatrix3,new_matrix);
   return modelViewMatrix3;

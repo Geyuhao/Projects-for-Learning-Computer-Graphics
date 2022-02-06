@@ -48,31 +48,30 @@
 
 <body onload="startup();">
 
-  <h1>MP1: Dancing Logo for CS 418</h1>
+  <h1>CS418 MP1: Dancing Logo</h1>
   <h3>By Ge Yuhao</p>
   <canvas id="myGLCanvas" width="500" height="500"></canvas>
 
 <p>Animation settings:</p>
 <div>
-  <input type="range" id="speed" name="speed" min="0" max="100" value="40">
+  <input type="range" id="speed" name="speed" min="0" max="100" value="60">
   <label for="speed">Rotation speed</label>
 </div>
 
 
 <p>Select an animation:</p>
 <div>
-<input type="radio" id="I" name="animation" value="I" checked>
+<input type="radio" id="I" name="animation" value="I" >
 <label for="I">UIUC Logo</label>
-<input type="button" value="Motion1" id="submit1" >
-<input type="button" value="Motion2" id="submit2" >
+<!-- <button type="button" id="button">Click Me!</button> -->
 </div>
 <div>
-<input type="radio" id="MyAnimation" name="animation" value="MyAnimation">
+<input type="radio" id="MyAnimation" name="animation" value="MyAnimation" checked>
 <label for="MyAnimation">ZJU Eagle </label>
 </div>
 
-<p>After selecting ZJU Eagle, click the button to see the transition</p>
-<button type="button" id="button">Click Me!</button>
+<!-- <p>After selecting ZJU Eagle, click the button to see the transition</p>
+<button type="button" id="button">Click Me!</button> -->
 
 <!-- <p>Leave any message if you want!</p>
 <input type = "text" value="" id="text">
