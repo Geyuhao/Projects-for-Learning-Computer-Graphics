@@ -31,23 +31,23 @@ var normalMatrix = glMatrix.mat3.create();
 
 // Material parameters
 /** @global Ambient material color/intensity for Phong reflection */
-var kAmbient = [227/255, 191/255, 76/255];
+var kAmbient = [1.0, 1.0, 1.0];
 /** @global Diffuse material color/intensity for Phong reflection */
-var kDiffuse = [227/255, 191/255, 76/255];
+var kDiffuse = [1, 1, 1];
 /** @global Specular material color/intensity for Phong reflection */
-var kSpecular = [255/255, 255/255, 255/255];
+var kSpecular = [0.05, 0.05, 0.05];
 /** @global Shininess exponent for Phong reflection */
 var shininess = 2;
 
 // Light parameters
 /** @global Light position in VIEW coordinates */
-var lightPosition = [0, -2, 2];
+var lightPosition = [0, 1, 3];
 /** @global Ambient light color/intensity for Phong reflection */
-var ambientLightColor = [0.5, 0.5, 0.5];
+var ambientLightColor = [0.1, 0.1, 0.1];
 /** @global Diffuse light color/intensity for Phong reflection */
-var diffuseLightColor = [0.7, 0.7, 0.7];
+var diffuseLightColor = [1, 1, 1];
 /** @global Specular light color/intensity for Phong reflection */
-var specularLightColor = [0.2, 0.2, 0.1];
+var specularLightColor = [0.9, 0.9, 0.9];
 
 /** @global Edge color for black wireframe */
 var kEdgeBlack = [0.0, 0.0, 0.0];
@@ -83,7 +83,7 @@ function startup() {
   myTerrain.setupBuffers(shaderProgram);
 
   // Set the background color to sky blue (you can change this if you like).
-  gl.clearColor(0.82, 0.93, 0.99, 1.0);
+  gl.clearColor(68/256, 67/256, 70/256, 1.0);
 
   gl.enable(gl.DEPTH_TEST);
   requestAnimationFrame(animate);
@@ -221,7 +221,7 @@ function draw() {
   
   // Generate the view matrix using lookat.
   const lookAtPt = glMatrix.vec3.fromValues(0.0, 2.0, -1.5);
-  const eyePt = glMatrix.vec3.fromValues(0.0, -1.5, 1);
+  const eyePt = glMatrix.vec3.fromValues(0.0, -1.5, 0.5);
   const up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0);
   glMatrix.mat4.lookAt(modelViewMatrix, eyePt, lookAtPt, up);
 

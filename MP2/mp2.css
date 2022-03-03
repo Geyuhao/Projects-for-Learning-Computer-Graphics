@@ -1,27 +1,29 @@
 h1 {
+    text-align: center;
     font-size: 36px;
     margin: 0;
     padding: 20px 0;
-    color: #022c53;
-    text-shadow: 2px 2px 2px #aaa;
+    color: #0c83f1;
+    text-shadow: 1px 1px 1px rgb(0, 0, 0);
     font-family: 'Times New Roman', serif;
 }
 
 
 h3 {
+    text-align: center;
     font-size: 26px;
     margin: 0;
-    color: #000000;
-    text-shadow: 2px 2px 2px #aaa;
+    color: #0c83f1;
+    text-shadow: 1px 1px 1px rgb(0, 0, 0);
     font-family: 'Tangerine', serif;  
 }
 
 p, label, fieldset {
-    color: rgb(0, 0, 0);
+    color: #0c83f1;
     font-size: 19px;
     line-height: 1;
     letter-spacing: 0.5px;
-    text-shadow: 0px 0px 0px #aaa;
+    text-shadow: 1px 1px 1px rgb(0, 0, 0);
     font-family: 'Times New Roman', serif;  
 }
 
@@ -45,7 +47,7 @@ button:hover {
 }
 
 html {
-    background-color: #a8cbec;
+    background-color: #444346;
     font-size: 15px; /* px means "pixels": the base font size is now 10 pixels high  */
 }
 
