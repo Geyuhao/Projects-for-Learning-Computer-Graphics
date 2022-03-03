@@ -47,17 +47,23 @@ uniform float maxz;
 
 void main(void) {
     vec3 temp_kDiffuse;
+    vec3 temp_kAmbient;
     // map the color according to the normalized height
     float  nrmZ;
     nrmZ = (vertexPosition.z - minz)/(maxz-minz);
-    if (nrmZ < 0.20) {
-        temp_kDiffuse = vec3(50.0 / 255.0, (130.0 - (0.20 - nrmZ) * 1000.0) / 255.0, 255.0 / 255.0);
-    } else if (nrmZ < 0.45) {
-        temp_kDiffuse = vec3((22.0 + nrmZ * 100.0) / 255.0, 255.0 / 255.0, (nrmZ * 100.0) / 255.0);
-    } else if (nrmZ < 0.75) {
-        temp_kDiffuse = vec3(230.0 / 255.0, (270.0 - nrmZ * 200.0 ) / 255.0, 63.0 / 255.0);
+
+    if (nrmZ < 0.3) {
+        temp_kDiffuse = vec3(0.0, 0.0, 0.3);
+        temp_kAmbient = vec3(0.2, 0.4, 0.9);
+    } else if (nrmZ < 0.5) {
+        temp_kDiffuse = vec3(0.1, 0.4, 0.1);
+        temp_kAmbient = vec3(0.0, 0.5, 0.0);
+    } else if (nrmZ < 0.7) {
+        temp_kDiffuse = vec3(0.5, 0.4, 0.0);
+        temp_kAmbient = vec3(0.5, 0.4, 0.0);
     } else {
-        temp_kDiffuse = vec3(1.0, 1.0, 1.0);
+        temp_kDiffuse = vec3(0.9, 0.9, 0.9);
+        temp_kAmbient = vec3(0.9, 0.9, 0.9);
     }
 
 
@@ -82,13 +88,15 @@ void main(void) {
 
     // Sum up all three lighting components into the color for the vertex,
     // and send it to the fragment shader.
-    vertexColor = vec4((  kAmbient * ambientLightColor
+    vertexColor = vec4((  temp_kAmbient * ambientLightColor
                         + temp_kDiffuse * diffuseLightColor * diffuseWeight
                         + kSpecular * specularLightColor * specularWeight), 1.0);
 
     gl_Position =
         projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);
 }
+
+
 </script>
 
 <!-- MP2: Modify the shaders to implement Phong shading instead of Gourand! -->

@@ -82,7 +82,7 @@ class Terrain {
      * @param {Object} v An array of length 3 holding the x,y,z coordinates.
      * @param {number} i The index of the vertex to set.
      */
-     setNormal(v, i) {
+    setNormal(v, i) {
         // MP2: Implement this function!
         this.normalData[i*3] = v[0];
         this.normalData[i*3 + 1] = v[1];
@@ -124,7 +124,7 @@ class Terrain {
         this.maxz = temp;
     }
 
-    getMinElevation(minz){
+    getMinElevation(){
         var temp = Infinity;
         for (var i=0; i<this.numVertices; i++){
             var zvalue = this.positionData[3*i + 2];
@@ -136,7 +136,7 @@ class Terrain {
     }
 
     /**
-     * This function does nothing.
+     *  Generate triangle meshes uniformly
      */    
     generateTriangles() {
         // MP2: Implement the rest of this function!
@@ -169,7 +169,6 @@ class Terrain {
             }
         }
 
-
         // We'll need these to set up the WebGL buffers.
         this.numVertices = this.positionData.length/3;
         this.numFaces = this.faceData.length/3;
@@ -177,68 +176,87 @@ class Terrain {
 
 
     /**
-     * This function does nothing.
+     * Use the Terrain algorithm to produce the terrain
      */
     shapeTerrain() {
-        // MP2: Implement this function!
-        var delta = 0.003;
-        var loops = 1000;
+        var delta = 0.005;
+        var loops = 2000;
+        var H = 0.002;
+        var threshold = 0.5;
 
         for (var loop=0; loop < loops; loop ++){
-            var random_x = Math.floor(Math.random() * (this.maxX - this.minX)) + this.minX;
-            var random_y = Math.floor(Math.random() * (this.maxY - this.minY)) + this.minY;
-            var random_pos = [random_x,random_y,0];         // random point in scene
+            var random_x = Math.random() * (this.maxX - this.minX) + this.minX;
+            var random_y = Math.random() * (this.maxY - this.minY) + this.minY;
+            var random_pos = [random_x,random_y];         // random point in scene
             var random_vec = glMatrix.vec2.create();        // random normal vector
             glMatrix.vec2.random(random_vec);
 
             for (var i = 0; i < this.numVertices; i++) {
                 var vertice = glMatrix.vec3.create();
                 this.getVertex(vertice,i);
-                if ((vertice[0] - random_pos[0]) * random_vec[0] + (vertice[1] - random_pos[1]) * random_vec[1] >= 0) {
-                    vertice[2] += delta;
+                var distance = Math.abs(random_vec[0]*vertice[0]+random_vec[1]*vertice[1]-(random_vec[1]*random_pos[1]+random_vec[0]*random_pos[0]))/Math.sqrt(Math.pow(random_vec[0],2)+Math.pow(random_vec[1],2));
+                if (distance<threshold){
+                    var smooth = Math.pow(1-Math.pow((distance/threshold),2),2);
+                } else{
+                    var smooth = 0;
+                }
+                if ((vertice[0] - random_pos[0]) * random_vec[0] + (vertice[1] - random_pos[1]) * random_vec[1] > 0) {
+                    vertice[2] += delta*smooth;
                 } else {
-                    vertice[2] -= delta;
+                    vertice[2] -= delta*smooth;
                 }
                 this.setVertex(vertice,i);
             }
-            delta = delta;
+            delta = delta/Math.pow(2,H);
         }
     }
 
 
     /**
-     * This function does nothing.
+     * This function calculate normals of each vertice according
+     * to the face normal value
      */
     calculateNormals() {
-        // MP2: Implement this function!
+        // local variable
+        var vertice1 = glMatrix.vec3.create();
+        var vertice2 = glMatrix.vec3.create();
+        var vertice3 = glMatrix.vec3.create();
+        var normal1 = glMatrix.vec3.create();
+        var normal2 = glMatrix.vec3.create();
+        var normal3 = glMatrix.vec3.create();
+        var edge1 = glMatrix.vec3.create();
+        var edge2 = glMatrix.vec3.create();
+        var normal = glMatrix.vec3.create();
+
+        // loop through each faces
         for (var i = 0; i < this.numFaces; i++) {
+
+            // get the index of the vertices
             var index1 = this.faceData[3*i];
             var index2 = this.faceData[3*i+1];
             var index3 = this.faceData[3*i+2];
 
-            var vertice1 = glMatrix.vec3.create();
-            var vertice2 = glMatrix.vec3.create();
-            var vertice3 = glMatrix.vec3.create();
-            var normal1 = glMatrix.vec3.create();
-            var normal2 = glMatrix.vec3.create();
-            var normal3 = glMatrix.vec3.create();
+            // get the position and old normarl infomation of each vertice
 
             this.getVertex(vertice1,index1);
             this.getVertex(vertice2,index2);
             this.getVertex(vertice3,index3);
-            this.getVertex(normal1,index1);
-            this.getVertex(normal2,index2);
-            this.getVertex(normal3,index3);
+            this.getNormal(normal1,index1);
+            this.getNormal(normal2,index2);
+            this.getNormal(normal3,index3);
 
-            var edge1 = vertice1 - vertice2;
-            var edge2 = vertice2 - vertice3;
+            // calculate the eage vector
 
-            var normal = glMatrix.vec3.create();
+            glMatrix.vec3.sub(edge1, vertice2, vertice1);
+            glMatrix.vec3.sub(edge2, vertice3, vertice2);
+
+            // calculate the face normal
             glMatrix.vec3.cross(normal, edge1, edge2);
 
-            normal1 += normal;
-            normal2 += normal;
-            normal3 += normal;
+            // add the normal to the three vertices
+            glMatrix.vec3.add(normal1, normal1, normal);
+            glMatrix.vec3.add(normal2, normal2, normal);
+            glMatrix.vec3.add(normal3, normal3, normal);
 
             this.setNormal(normal1,index1);
             this.setNormal(normal2,index2);

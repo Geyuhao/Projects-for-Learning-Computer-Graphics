@@ -32,19 +32,19 @@ var kAmbient = [227/255, 191/255, 76/255];
 /** @global Diffuse material color/intensity for Phong reflection */
 var kDiffuse = [227/255, 191/255, 76/255];
 /** @global Specular material color/intensity for Phong reflection */
-var kSpecular = [227/255, 191/255, 76/255];
+var kSpecular = [255/255, 255/255, 255/255];
 /** @global Shininess exponent for Phong reflection */
 var shininess = 2;
 
 // Light parameters
 /** @global Light position in VIEW coordinates */
-var lightPosition = [0, 2, 2];
+var lightPosition = [0, -2, 2];
 /** @global Ambient light color/intensity for Phong reflection */
-var ambientLightColor = [0.1, 0.1, 0.1];
+var ambientLightColor = [0.5, 0.5, 0.5];
 /** @global Diffuse light color/intensity for Phong reflection */
-var diffuseLightColor = [1, 1, 1];
+var diffuseLightColor = [0.7, 0.7, 0.7];
 /** @global Specular light color/intensity for Phong reflection */
-var specularLightColor = [1, 1, 1];
+var specularLightColor = [0.2, 0.2, 0.1];
 
 /** @global Edge color for black wireframe */
 var kEdgeBlack = [0.0, 0.0, 0.0];
@@ -76,7 +76,7 @@ function startup() {
   setupShaders();
 
   // Let the Terrain object set up its own buffers.
-  myTerrain = new Terrain(50, -1, 1, -1, 1);
+  myTerrain = new Terrain(128, -1, 1, -1, 1);
   myTerrain.setupBuffers(shaderProgram);
 
   // Set the background color to sky blue (you can change this if you like).
@@ -189,15 +189,15 @@ function setupShaders() {
   shaderProgram.locations.ambientLightColor =
     gl.getUniformLocation(shaderProgram, "ambientLightColor");
   shaderProgram.locations.diffuseLightColor =
-  gl.getUniformLocation(shaderProgram, "diffuseLightColor");
+    gl.getUniformLocation(shaderProgram, "diffuseLightColor");
   shaderProgram.locations.specularLightColor =
-  gl.getUniformLocation(shaderProgram, "specularLightColor");
+    gl.getUniformLocation(shaderProgram, "specularLightColor");
 
   shaderProgram.locations.maxz = 
-  gl.getUniformLocation(shaderProgram,"maxz");
+    gl.getUniformLocation(shaderProgram,"maxz");
 
   shaderProgram.locations.minz = 
-  gl.getUniformLocation(shaderProgram,"minz");
+    gl.getUniformLocation(shaderProgram,"minz");
 }
 
 /**
@@ -217,8 +217,8 @@ function draw() {
                             near, far);
   
   // Generate the view matrix using lookat.
-  const lookAtPt = glMatrix.vec3.fromValues(0.0, 1.0, -1.0);
-  const eyePt = glMatrix.vec3.fromValues(0.0, -2.0, 2.0);
+  const lookAtPt = glMatrix.vec3.fromValues(0.0, 2.0, -1.5);
+  const eyePt = glMatrix.vec3.fromValues(0.0, -1.5, 1);
   const up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0);
   glMatrix.mat4.lookAt(modelViewMatrix, eyePt, lookAtPt, up);
 
