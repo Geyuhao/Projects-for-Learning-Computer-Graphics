@@ -4,16 +4,11 @@
  * @brief Starter code for CS 418 MP2 at the University of Illinois at
  * Urbana-Champaign.
  * 
+ * @author Yuhao Ge <yuhaoge2@illinois.edu>
+ * @brief Modified version
+ * 
+ * 
  * Updated Spring 2021 for WebGL 2.0/GLSL 3.00 ES.
- * 
- * You'll need to implement the following functions:
- * setVertex(v, i) - convenient vertex access for 1-D array
- * getVertex(v, i) - convenient vertex access for 1-D array
- * generateTriangles() - generate a flat grid of triangles
- * shapeTerrain() - shape the grid into more interesting terrain
- * calculateNormals() - calculate normals after warping terrain
- * 
- * Good luck! Come to office hours if you get stuck!
  */
 
 class Terrain {   
@@ -113,6 +108,9 @@ class Terrain {
         v[2]=this.normalData[i*3 + 2];
     }
 
+    /**
+     * Check the maximum height of the terrain
+     */
     getMaxElevation(){
         var temp = -Infinity;
         for (var i=0; i<this.numVertices; i++){
@@ -124,6 +122,9 @@ class Terrain {
         this.maxz = temp;
     }
 
+    /**
+     * Check the minimum height of the terrain
+     */
     getMinElevation(){
         var temp = Infinity;
         for (var i=0; i<this.numVertices; i++){
@@ -180,7 +181,7 @@ class Terrain {
      */
     shapeTerrain() {
         var delta = 0.005;
-        var loops = 2000;
+        var loops = 1500;
         var H = 0.002;
         var threshold = 0.5;
 

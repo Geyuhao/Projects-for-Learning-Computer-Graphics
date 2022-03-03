@@ -4,6 +4,9 @@
  * @brief Starter code for CS 418 MP2 at the University of Illinois at
  * Urbana-Champaign.
  * 
+ * @author Yuhao Ge <yuhaoge2@illinois.edu>
+ * @brief Modified version
+ * 
  * Updated Spring 2021 for WebGL 2.0/GLSL 3.00 ES.
  */
 
@@ -316,6 +319,11 @@ function setZUniforms(maxz,minz){
  function animate(currentTime) {
   // Draw the frame.
   draw();
+
   // Animate the next frame. 
   requestAnimationFrame(animate);
+}
+
+function regenerate(){
+  startup();
 }
