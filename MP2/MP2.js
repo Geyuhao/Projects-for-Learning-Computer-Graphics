@@ -221,7 +221,7 @@ function draw() {
   
   // Generate the view matrix using lookat.
   const lookAtPt = glMatrix.vec3.fromValues(0.0, 2.0, -1.5);
-  const eyePt = glMatrix.vec3.fromValues(0.0, -1.5, 0.5);
+  const eyePt = glMatrix.vec3.fromValues(0.0, -2, 1);
   const up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0);
   glMatrix.mat4.lookAt(modelViewMatrix, eyePt, lookAtPt, up);
 
@@ -324,6 +324,11 @@ function setZUniforms(maxz,minz){
   requestAnimationFrame(animate);
 }
 
+
+/**
+ * Redraw the terrain
+ */
 function regenerate(){
-  startup();
+  myTerrain = new Terrain(128, -1, 1, -1, 1);
+  myTerrain.setupBuffers(shaderProgram);
 }
