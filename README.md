@@ -6,3 +6,5 @@ See http://geyuhao.top
 
 
 ![image](https://github.com/Geyuhao/CS-418/blob/main/img/mp1.gif)
+
+<img width="150" height="150" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp1.gif"/>
