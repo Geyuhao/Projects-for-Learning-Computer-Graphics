@@ -55,6 +55,17 @@ var kEdgeBlack = [0.0, 0.0, 0.0];
 var kEdgeWhite = [0.7, 0.7, 0.7];
 
 
+/** @global used the change position */
+var camPosition = glMatrix.vec3.create();           //the camera's current position
+var camOrientation = glMatrix.quat.create();        //the camera's current orientation
+var camSpeed;                                 //the camera's current speed in the forward direction
+var camInitialDir = glMatrix.vec3.create();         //the camera's initial view direction 
+var keys = {};
+
+
+
+
+
 /**
  * Translates degrees to radians
  * @param {Number} degrees Degree input to function
@@ -71,6 +82,11 @@ function degToRad(degrees) {
  * Startup function called from the HTML code to start program.
  */
 function startup() {
+
+  initialize_view();
+  document.onkeydown = keyDown;
+  document.onkeyup = keyUp;
+
   // Set up the canvas with a WebGL context.
   canvas = document.getElementById("glCanvas");
   gl = createGLContext(canvas);
@@ -221,7 +237,7 @@ function draw() {
   
   // Generate the view matrix using lookat.
   const lookAtPt = glMatrix.vec3.fromValues(0.0, 2.0, -1.5);
-  const eyePt = glMatrix.vec3.fromValues(0.0, -2, 1);
+  const eyePt = camPosition;
   const up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0);
   glMatrix.mat4.lookAt(modelViewMatrix, eyePt, lookAtPt, up);
 
@@ -320,10 +336,11 @@ function setZUniforms(maxz,minz){
   // Draw the frame.
   draw();
 
+  update_view();
+
   // Animate the next frame. 
   requestAnimationFrame(animate);
 }
-
 
 /**
  * Redraw the terrain
@@ -331,4 +348,63 @@ function setZUniforms(maxz,minz){
 function regenerate(){
   myTerrain = new Terrain(128, -1, 1, -1, 1);
   myTerrain.setupBuffers(shaderProgram);
+  initialize_view();
+}
+
+
+function initialize_view(){
+  camPosition = glMatrix.vec3.fromValues(0, -2, 1);           //the camera's current position
+  camOrientation = glMatrix.quat.fromValues(0, 1, 0, 0);   //the camera's current orientation
+  camSpeed = 0.0005;                                          //the camera's current speed in the forward direction
+  camInitialDir = glMatrix.vec3.fromValues(0, 1, 0);          //the camera's initial view direction 
+  eulerX = 0;
+  eulerY = 0;
+  eulerZ = 0;
+}
+
+
+function update_view(){
+  var eulerX = 0;
+  var eulerY = 0;
+  var eulerZ = 0;
+
+  if (keys["="] && camSpeed <  0.001) camSpeed += 0.0001;
+  if (keys["-"] && camSpeed > -0.001) camSpeed -= 0.0001;
+  if (keys["Escape"]) initialize_view();
+  if (keys["a"]) eulerX -= 1;
+  if (keys["d"]) eulerX += 1;
+  if (keys["w"]) eulerY += 1;
+  if (keys["s"]) eulerY -= 1;
+
+  // store the degree of rotation
+  var orientationDelta = glMatrix.quat.create();
+  var deltaPosition = glMatrix.quat.create();
+  var forwardDirection = glMatrix.vec3.create();
+
+  glMatrix.quat.fromEuler(orientationDelta, eulerX, eulerY, eulerZ);
+  glMatrix.quat.multiply(camOrientation,camOrientation,orientationDelta)
+
+  glMatrix.vec3.transformQuat(forwardDirection,forwardDirection,camOrientation);
+
+  // camInitialDir
+  console.log(forwardDirection);
+  glMatrix.vec3.normalize(forwardDirection,forwardDirection);
+  glMatrix.quat.scale(deltaPosition, forwardDirection, camSpeed); // calculate the delta positon
+  glMatrix.quat.add(camPosition, camPosition, deltaPosition);     // update camera postion
+}
+
+
+
+/** 
+ * Logs keys as "down" when pressed 
+ */
+function keyDown(event) {
+  keys[event.key] = true;
+}
+
+/** 
+ * Logs keys as "up" when pressed 
+ */
+function keyUp(event) {
+  keys[event.key] = false;
 }
