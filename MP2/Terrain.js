@@ -180,8 +180,8 @@ class Terrain {
      * Use the Terrain algorithm to produce the terrain
      */
     shapeTerrain() {
-        var delta = 0.005;
-        var loops = 1500;
+        var delta = 0.006;
+        var loops = 1000;
         var H = 0.002;
         var threshold = 0.5;
 

@@ -33,7 +33,7 @@ var normalMatrix = glMatrix.mat3.create();
 /** @global Ambient material color/intensity for Phong reflection */
 var kAmbient = [1.0, 1.0, 1.0];
 /** @global Diffuse material color/intensity for Phong reflection */
-var kDiffuse = [1, 1, 1];
+var kDiffuse = [0.7, 0.7, 0.7];
 /** @global Specular material color/intensity for Phong reflection */
 var kSpecular = [0.05, 0.05, 0.05];
 /** @global Shininess exponent for Phong reflection */

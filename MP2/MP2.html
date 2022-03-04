@@ -44,10 +44,10 @@ void main(void) {
     // map the color according to the normalized height
     float  nrmZ = (vertexPosition.z - minz)/(maxz-minz);
 
-    if (nrmZ < 0.3) {
+    if (nrmZ < 0.35) {
         temp_kDiffuse = vec3(0.0, 0.0, 0.3);
-        temp_kAmbient = vec3(0.2, 0.4, 0.9);
-    } else if (nrmZ < 0.5) {
+        temp_kAmbient = vec3(0.2, 0.4, 0.8);
+    } else if (nrmZ < 0.55) {
         temp_kDiffuse = vec3(0.1, 0.4, 0.1);
         temp_kAmbient = vec3(0.0, 0.5, 0.0);
     } else if (nrmZ < 0.7) {
@@ -103,7 +103,7 @@ void main(void) {
     // vec3 vertexNormalView = normalize(vertexNormalView);
 
     // The camera is at the origin in view coordinates
-    vec3 cameraPositionView = vec3(0.0, 0.0, 0.0);
+    vec3 cameraPositionView = vec3(1.0, 1.0, 0.0);
     
     // Calculate the three other vectors we need: l, r, and v
     vec3 lightVector = normalize(lightPosition - vertexPositionView);
