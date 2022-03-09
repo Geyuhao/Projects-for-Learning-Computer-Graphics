@@ -58,8 +58,10 @@ var kEdgeWhite = [0.7, 0.7, 0.7];
 /** @global used the change position */
 var camPosition = glMatrix.vec3.create();           //the camera's current position
 var camOrientation = glMatrix.quat.create();        //the camera's current orientation
-var camSpeed;                                 //the camera's current speed in the forward direction
+var camSpeed;                                       //the camera's current speed in the forward direction
 var camInitialDir = glMatrix.vec3.create();         //the camera's initial view direction 
+var camUP = glMatrix.vec3.create();     
+var camLook = glMatrix.vec3.create();
 var keys = {};
 
 
@@ -236,9 +238,9 @@ function draw() {
                             near, far);
   
   // Generate the view matrix using lookat.
-  const lookAtPt = glMatrix.vec3.fromValues(0.0, 2.0, -1.5);
+  const lookAtPt = camLook;
   const eyePt = camPosition;
-  const up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0);
+  const up = camUP;
   glMatrix.mat4.lookAt(modelViewMatrix, eyePt, lookAtPt, up);
 
   setMatrixUniforms();
@@ -355,8 +357,10 @@ function regenerate(){
 function initialize_view(){
   camPosition = glMatrix.vec3.fromValues(0, -2, 1);           //the camera's current position
   camOrientation = glMatrix.quat.fromValues(0, 1, 0, 0);   //the camera's current orientation
-  camSpeed = 0.0005;                                          //the camera's current speed in the forward direction
+  camSpeed = 0.001;                                          //the camera's current speed in the forward direction
   camInitialDir = glMatrix.vec3.fromValues(0, 1, 0);          //the camera's initial view direction 
+  camUP = glMatrix.vec3.fromValues(0.0, 1.0, 0.0);
+  camLook = glMatrix.vec3.fromValues(0.0, 2.0, -1.5);
   eulerX = 0;
   eulerY = 0;
   eulerZ = 0;
@@ -368,13 +372,13 @@ function update_view(){
   var eulerY = 0;
   var eulerZ = 0;
 
-  if (keys["="] && camSpeed <  0.001) camSpeed += 0.0001;
-  if (keys["-"] && camSpeed > -0.001) camSpeed -= 0.0001;
+  if (keys["="] && camSpeed <  0.01) camSpeed += 0.001;
+  if (keys["-"] && camSpeed > -0.01) camSpeed -= 0.001;
   if (keys["Escape"]) initialize_view();
-  if (keys["a"]) eulerX -= 1;
-  if (keys["d"]) eulerX += 1;
-  if (keys["w"]) eulerY += 1;
-  if (keys["s"]) eulerY -= 1;
+  if (keys["s"]) eulerX -= 1;
+  if (keys["w"]) eulerX += 1;
+  if (keys["a"]) eulerY += 1;
+  if (keys["d"]) eulerY -= 1;
 
   // store the degree of rotation
   var orientationDelta = glMatrix.quat.create();
@@ -382,15 +386,26 @@ function update_view(){
   var forwardDirection = glMatrix.vec3.create();
 
   glMatrix.quat.fromEuler(orientationDelta, eulerX, eulerY, eulerZ);
-  glMatrix.quat.multiply(camOrientation,camOrientation,orientationDelta)
+  glMatrix.quat.multiply(camOrientation,camOrientation,orientationDelta);
 
-  glMatrix.vec3.transformQuat(forwardDirection,forwardDirection,camOrientation);
-
-  // camInitialDir
-  console.log(forwardDirection);
+  // update the forward direction
+  glMatrix.vec3.transformQuat(forwardDirection,camInitialDir,camOrientation);
   glMatrix.vec3.normalize(forwardDirection,forwardDirection);
+
+  // update the camera position
   glMatrix.quat.scale(deltaPosition, forwardDirection, camSpeed); // calculate the delta positon
   glMatrix.quat.add(camPosition, camPosition, deltaPosition);     // update camera postion
+
+  // update the up direction
+  glMatrix.vec3.transformQuat(camUP,camUP,camOrientation);
+  glMatrix.vec3.normalize(camUP,camUP);
+
+  console.log(camPosition,forwardDirection);
+
+  // update the look at point
+  // glMatrix.vec3.transformQuat(camInitialDir,camInitialDir,camOrientation);
+  glMatrix.vec3.add(camLook,camPosition,forwardDirection);
+
 }
 
 
