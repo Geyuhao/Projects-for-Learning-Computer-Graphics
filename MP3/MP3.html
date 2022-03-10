@@ -1,7 +1,7 @@
 <!DOCTYPE HTML> 
 <html lang="en"> 
 <head>
-<title>MP2: Terrain</title>
+<title>MP3: Simulating Flight</title>
 <meta charset="utf-8"> 
 </head>
 
@@ -98,9 +98,9 @@ uniform vec3 diffuseLightColor;
 uniform vec3 specularLightColor;
 
 void main(void) {
-    // Interpolate the computed vertex color for each fragment.
+    #define LOG2 1.442695
 
-    // vec3 vertexNormalView = normalize(vertexNormalView);
+    // Interpolate the computed vertex color for each fragment.
 
     // The camera is at the origin in view coordinates
     vec3 cameraPositionView = vec3(1.0, 1.0, 0.0);
@@ -120,18 +120,27 @@ void main(void) {
     // Sum up all three lighting components into the color for the vertex,
     // and send it to the fragment shader.
     
-    fragmentColor = vec4(( temp_kAmbient * ambientLightColor
+    vec4 color = vec4(( temp_kAmbient * ambientLightColor
                         + temp_kDiffuse * diffuseLightColor * diffuseWeight
                         + kSpecular * specularLightColor * specularWeight), 1.0);
+
+    // add the fog information
+    float fogDistance = (gl_FragCoord.z / gl_FragCoord.w) * (gl_FragCoord.z / gl_FragCoord.w);
+    vec4 fogColor = vec4(0.7, 0.7, 0.7, 1);
+    float fogDensity = 0.3;
+    float fogAmount = 1.0 - exp2(-fogDensity * fogDensity * fogDistance * fogDistance * LOG2);
+    fogAmount = clamp(fogAmount, 0.0, 1.0);
+    fragmentColor = mix(color, fogColor, fogAmount);
+
 }
 </script>
 
 
 <body onload="startup();">
-    <h1>CS418 MP2: Terrain Modeling</h1>
+    <h1>CS418 MP3: Simulating Flight</h1>
     <h3>By Ge Yuhao</p>
 
-    <canvas id="glCanvas" width="1200" height="600"></canvas>
+    <canvas id="glCanvas" width="1200" height="500"></canvas>
 
     <form id="input_form">
         <fieldset>
@@ -140,10 +149,28 @@ void main(void) {
                 <input type="radio" name="primitive" id="wireframe" value="wireframe"> Wireframe
                 <input type="radio" name="primitive" id="polygon" value="polygon" checked> Polygon
                 <input type="radio" name="primitive" id="wirepoly" value="wirepoly" > Polygon with Edges
-                <input id="Generate" type="button" value="Generate Terrain" onclick="regenerate();" />
+                <input id="Generate" type="button" value="Generate Map" onclick="regenerate();" />
+            </div>
+        </fieldset>
+        
+        <fieldset>
+            <legend>Fog Options</legend>
+            <div>
+                <input type="checkbox" id="fog" name="fog" checked>
+                <label for="fog">Enable Fog</label>
             </div>
         </fieldset>
     </form>
+
+    <form id="Instructions">
+        <fieldset>
+            <legend>Instructions</legend>
+            <div>Rolling:  a, b </div>
+            <div>Pitching: w, s </div>
+            <div>Speed:    +, - </div>
+        </fieldset>
+    </form>
+
 </body>
 
 </html>

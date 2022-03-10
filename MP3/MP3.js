@@ -33,7 +33,7 @@ var normalMatrix = glMatrix.mat3.create();
 /** @global Ambient material color/intensity for Phong reflection */
 var kAmbient = [1.0, 1.0, 1.0];
 /** @global Diffuse material color/intensity for Phong reflection */
-var kDiffuse = [0.7, 0.7, 0.7];
+var kDiffuse = [0.8, 0.8, 0.8];
 /** @global Specular material color/intensity for Phong reflection */
 var kSpecular = [0.05, 0.05, 0.05];
 /** @global Shininess exponent for Phong reflection */
@@ -41,9 +41,9 @@ var shininess = 2;
 
 // Light parameters
 /** @global Light position in VIEW coordinates */
-var lightPosition = [0, 1, 3];
+var lightPosition = [1, 1, 2];
 /** @global Ambient light color/intensity for Phong reflection */
-var ambientLightColor = [0.1, 0.1, 0.1];
+var ambientLightColor = [0.3, 0.3, 0.3];
 /** @global Diffuse light color/intensity for Phong reflection */
 var diffuseLightColor = [1, 1, 1];
 /** @global Specular light color/intensity for Phong reflection */
@@ -101,7 +101,7 @@ function startup() {
   myTerrain.setupBuffers(shaderProgram);
 
   // Set the background color to sky blue (you can change this if you like).
-  gl.clearColor(68/256, 67/256, 70/256, 1.0);
+  gl.clearColor(129/256, 183/256, 256/256, 1.0);
 
   gl.enable(gl.DEPTH_TEST);
   requestAnimationFrame(animate);
@@ -241,6 +241,9 @@ function draw() {
   const lookAtPt = camLook;
   const eyePt = camPosition;
   const up = camUP;
+
+  // console.log("camLook ",lookAtPt,"camPosition",eyePt,"camUP",up);
+
   glMatrix.mat4.lookAt(modelViewMatrix, eyePt, lookAtPt, up);
 
   setMatrixUniforms();
@@ -265,6 +268,12 @@ function draw() {
   else if (document.getElementById("wireframe").checked) {
     setMaterialUniforms(kEdgeBlack, kEdgeBlack, kEdgeBlack, shininess);
     myTerrain.drawEdges();
+  }
+
+  if (document.getElementById("fog").checked == true)
+  {
+      //update a uniform variable to let 
+      //fragment shader know whether or not to fog
   }
 }
 
@@ -338,7 +347,8 @@ function setZUniforms(maxz,minz){
   // Draw the frame.
   draw();
 
-  update_view();
+  // console.log(lightPosition);
+  update_view();  
 
   // Animate the next frame. 
   requestAnimationFrame(animate);
@@ -355,11 +365,11 @@ function regenerate(){
 
 
 function initialize_view(){
-  camPosition = glMatrix.vec3.fromValues(0, -2, 1);           //the camera's current position
-  camOrientation = glMatrix.quat.fromValues(0, 1, 0, 0);   //the camera's current orientation
+  camPosition = glMatrix.vec3.fromValues(0, -1.4, 0.2);           //the camera's current position
+  camOrientation = glMatrix.quat.create();                    //the camera's current orientation
   camSpeed = 0.001;                                          //the camera's current speed in the forward direction
   camInitialDir = glMatrix.vec3.fromValues(0, 1, 0);          //the camera's initial view direction 
-  camUP = glMatrix.vec3.fromValues(0.0, 1.0, 0.0);
+  camUP = glMatrix.vec3.fromValues(0.0, 0.0, 1.0);
   camLook = glMatrix.vec3.fromValues(0.0, 2.0, -1.5);
   eulerX = 0;
   eulerY = 0;
@@ -371,40 +381,50 @@ function update_view(){
   var eulerX = 0;
   var eulerY = 0;
   var eulerZ = 0;
+  var accelerate = 0;
 
-  if (keys["="] && camSpeed <  0.01) camSpeed += 0.001;
-  if (keys["-"] && camSpeed > -0.01) camSpeed -= 0.001;
+  if (keys["="] && accelerate < 0.001) accelerate += 0.00005;
+  if (keys["-"] && accelerate > -0.001) accelerate -= 0.00005;
   if (keys["Escape"]) initialize_view();
-  if (keys["s"]) eulerX -= 1;
-  if (keys["w"]) eulerX += 1;
-  if (keys["a"]) eulerY += 1;
-  if (keys["d"]) eulerY -= 1;
+  if (keys["w"]) eulerX -= 0.2;
+  if (keys["s"]) eulerX += 0.2;
+  if (keys["d"]) eulerY += 0.2;
+  if (keys["a"]) eulerY -= 0.2;
+  if (keys["ArrowLeft"]) eulerZ += 0.2;
+  if (keys["ArrowRight"]) eulerZ -= 0.2;
+
+
+  if (camSpeed >= 0.01 && accelerate > 0){
+    accelerate = 0;
+  }
+  if (camSpeed <= 0.001 && accelerate < 0){
+    accelerate = 0;
+  }
+  camSpeed += accelerate;
 
   // store the degree of rotation
   var orientationDelta = glMatrix.quat.create();
   var deltaPosition = glMatrix.quat.create();
-  var forwardDirection = glMatrix.vec3.create();
+  var localInitialDir = glMatrix.vec3.fromValues(0, 1, 0);          //the camera's initial view direction 
+  var localUP = glMatrix.vec3.fromValues(0.0, 0.0, 1.0);
 
   glMatrix.quat.fromEuler(orientationDelta, eulerX, eulerY, eulerZ);
   glMatrix.quat.multiply(camOrientation,camOrientation,orientationDelta);
 
   // update the forward direction
-  glMatrix.vec3.transformQuat(forwardDirection,camInitialDir,camOrientation);
-  glMatrix.vec3.normalize(forwardDirection,forwardDirection);
-
-  // update the camera position
-  glMatrix.quat.scale(deltaPosition, forwardDirection, camSpeed); // calculate the delta positon
-  glMatrix.quat.add(camPosition, camPosition, deltaPosition);     // update camera postion
+  glMatrix.vec3.transformQuat(camInitialDir,localInitialDir,camOrientation);
+  glMatrix.vec3.normalize(camInitialDir,camInitialDir);
 
   // update the up direction
-  glMatrix.vec3.transformQuat(camUP,camUP,camOrientation);
+  glMatrix.vec3.transformQuat(camUP,localUP,camOrientation);
   glMatrix.vec3.normalize(camUP,camUP);
 
-  console.log(camPosition,forwardDirection);
+  // update the camera position
+  glMatrix.quat.scale(deltaPosition, camInitialDir, camSpeed); // calculate the delta positon
+  glMatrix.quat.add(camPosition, camPosition, deltaPosition);     // update camera postion
 
   // update the look at point
-  // glMatrix.vec3.transformQuat(camInitialDir,camInitialDir,camOrientation);
-  glMatrix.vec3.add(camLook,camPosition,forwardDirection);
+  glMatrix.vec3.add(camLook,camPosition,deltaPosition);
 
 }
 
