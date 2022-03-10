@@ -385,7 +385,7 @@ function update_view(){
 
   if (keys["="] && accelerate < 0.001) accelerate += 0.00005;
   if (keys["-"] && accelerate > -0.001) accelerate -= 0.00005;
-  if (keys["Escape"]) initialize_view();
+  if (keys["`"]) initialize_view();
   if (keys["w"]) eulerX -= 0.2;
   if (keys["s"]) eulerX += 0.2;
   if (keys["d"]) eulerY += 0.2;
