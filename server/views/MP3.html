@@ -1,0 +1,196 @@
+<!DOCTYPE HTML> 
+<html lang="en"> 
+<head>
+<title>MP3: Simulating Flight</title>
+<meta charset="utf-8"> 
+</head>
+
+<!-- If you add additional .js files, be sure to add them here. -->
+<link href="https://fonts.googleapis.com/css?family=Tangerine" rel="stylesheet">
+<script src="gl-matrix-min.js"></script>
+<script src="Terrain.js"></script>
+<script src="MP3.js"></script>
+<link href="mp3.css" rel="stylesheet">
+<meta name="author" content="Yuhao Ge">
+
+<!-- MP2: Modify the shaders to implement Phong shading instead of Gourand! -->
+<script id="shader-vs" type="x-shader/x-vertex">#version 300 es
+// Vertex Shader
+// Implements Gourand shading. See the lecture on "Basic Shading" for details.
+
+// Use high-precision floats if available on this device.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+
+in vec3 vertexPosition;
+in vec3 vertexNormal;
+
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat3 normalMatrix;
+uniform float minz;
+uniform float maxz;
+
+out vec3 vertexPositionView;
+out vec3 vertexNormalView;
+out vec3 temp_kDiffuse;
+out vec3 temp_kAmbient;
+
+
+void main(void) {
+    // map the color according to the normalized height
+    float  nrmZ = (vertexPosition.z - minz)/(maxz-minz);
+
+    if (nrmZ < 0.35) {
+        temp_kDiffuse = vec3(0.0, 0.0, 0.3);
+        temp_kAmbient = vec3(0.2, 0.4, 0.8);
+    } else if (nrmZ < 0.55) {
+        temp_kDiffuse = vec3(0.1, 0.4, 0.1);
+        temp_kAmbient = vec3(0.0, 0.5, 0.0);
+    } else if (nrmZ < 0.7) {
+        temp_kDiffuse = vec3(0.5, 0.4, 0.0);
+        temp_kAmbient = vec3(0.5, 0.4, 0.0);
+    } else {
+        temp_kDiffuse = vec3(0.9, 0.9, 0.9);
+        temp_kAmbient = vec3(0.9, 0.9, 0.9);
+    }
+
+    // Transform the vertex position and normal to view coordinates
+    vertexPositionView =(modelViewMatrix * vec4(vertexPosition, 1.0)).xyz;
+    vertexNormalView = normalize(normalMatrix * vertexNormal);
+
+    gl_Position =
+        projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);
+}
+
+
+</script>
+
+<!-- MP2: Modify the shaders to implement Phong shading instead of Gourand! -->
+<script id="shader-fs" type="x-shader/x-fragment">#version 300 es
+// Fragment Shader
+// Implements Gourand shading. See the lecture on "Basic Shading" for details.
+
+// Use high-precision floats if available on this device.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+
+in vec3 temp_kAmbient;
+in vec3 temp_kDiffuse;
+in vec3 vertexNormalView;
+in vec3 vertexPositionView;
+
+out vec4 fragmentColor;
+
+uniform vec3 lightPosition;
+uniform vec3 kAmbient;
+uniform vec3 kDiffuse;
+uniform vec3 kSpecular;
+uniform float shininess;
+uniform vec3 ambientLightColor;
+uniform vec3 diffuseLightColor;
+uniform vec3 specularLightColor;
+
+void main(void) {
+    #define LOG2 1.442695
+
+    // Interpolate the computed vertex color for each fragment.
+
+    // The camera is at the origin in view coordinates
+    vec3 cameraPositionView = vec3(1.0, 1.0, 0.0);
+    
+    // Calculate the three other vectors we need: l, r, and v
+    vec3 lightVector = normalize(lightPosition - vertexPositionView);
+    vec3 reflectionVector = normalize(reflect(-lightVector, vertexNormalView));
+    vec3 viewVector = normalize(cameraPositionView - vertexPositionView);
+
+    // Calculate diffuse light weighting: (n dot l)
+    float diffuseWeight = max(dot(vertexNormalView, lightVector), 0.0);
+    
+    // Calculate the specular light weighting: (r dot v)^(shininess)
+    float rDotV = max(dot(reflectionVector, viewVector), 0.0);
+    float specularWeight = pow(rDotV, shininess);
+
+    // Sum up all three lighting components into the color for the vertex,
+    // and send it to the fragment shader.
+    
+    vec4 color = vec4(( temp_kAmbient * ambientLightColor
+                        + temp_kDiffuse * diffuseLightColor * diffuseWeight
+                        + kSpecular * specularLightColor * specularWeight), 1.0);
+
+    // add the fog information
+    float fogDistance = (gl_FragCoord.z / gl_FragCoord.w) * (gl_FragCoord.z / gl_FragCoord.w);
+    vec4 fogColor = vec4(0.7, 0.7, 0.7, 1);
+    float fogDensity = 0.3;
+    float fogAmount = 1.0 - exp2(-fogDensity * fogDensity * fogDistance * fogDistance * LOG2);
+    fogAmount = clamp(fogAmount, 0.0, 1.0);
+    fragmentColor = mix(color, fogColor, fogAmount);
+
+}
+</script>
+
+
+<body onload="startup();">
+    <h1>CS418 MP3: Simulating Flight</h1>
+    <h3>By Ge Yuhao</p>
+
+    <canvas id="glCanvas" width="1200" height="480"></canvas>
+
+    <form id="Instructions" class="left">
+        <fieldset>
+            <legend>Instructions</legend>
+            <div>Roll:  A, D </div>
+            <div>Pitch: W, S </div>
+            <div>Speed:    +, - </div>
+            <div>Go back:  `</div>
+        </fieldset>
+    </form>
+
+    <form id="input_form">
+        <fieldset class="right">
+            <legend>Rendering Options</legend>
+            <div>
+                <input type="radio" name="primitive" id="wireframe" value="wireframe"> Wireframe
+            </div>
+            <div>
+                <input type="radio" name="primitive" id="polygon" value="polygon" checked> Polygon
+            </div>
+            <div>
+                <input type="radio" name="primitive" id="wirepoly" value="wirepoly" > Polygon with Edges
+            </div>
+            <div>
+                <input type="checkbox" id="fog" name="fog" checked>
+                <label for="fog">Enable Fog</label>
+            </div>
+            <div>
+                <input id="Generate" type="button" value="Regenerate Map" onclick="regenerate();" />
+            </div>
+        </fieldset>
+    </form>
+
+    <div>
+        <fieldset>
+            <legend>Secret chat box</legend>
+            <form action="user" method="POST">
+                <div>
+                    <label for="Name">Name</label>
+                    <input type="text" class="form-control col-lg-9" id="name" placeholder="Name (Could be none)" name="name">
+                </div> 
+                <div>
+                    <label for="message">Message</label>
+                    <input type="text" class="form-control col-lg-9" id="message" placeholder="Anything want to say" name="message">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </fieldset>
+    </div>
+    
+</body>
+
+</html>

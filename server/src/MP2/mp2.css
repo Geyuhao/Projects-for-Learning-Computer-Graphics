@@ -1,0 +1,60 @@
+h1 {
+    text-align: center;
+    font-size: 36px;
+    margin: 0;
+    padding: 20px 0;
+    color: #0c83f1;
+    text-shadow: 2px 2px 2px rgb(0, 0, 0);
+    font-family: 'Times New Roman', serif;
+}
+
+
+h3 {
+    text-align: center;
+    font-size: 26px;
+    margin: 0;
+    color: #0c83f1;
+    text-shadow: 1px 1px 1px rgb(0, 0, 0);
+    font-family: 'Tangerine', serif;  
+}
+
+p, label, fieldset {
+    color: #0c83f1;
+    font-size: 19px;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px 1px rgb(0, 0, 0);
+    font-family: 'Times New Roman', serif;  
+}
+
+
+button {
+    background-color: #0253af;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    padding: 15px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+
+button:hover {
+    background-color: #f44336; /* Green */
+    color: white;
+}
+
+html {
+    background-color: #444346;
+    font-size: 15px; /* px means "pixels": the base font size is now 10 pixels high  */
+}
+
+body {
+    width: 1200px;
+    margin: 0 auto;
+    background-color: (0.82, 0.93, 0.99, 1.0);
+    padding: 0 20px 20px 20px;
+    /* border: 3px solid black; */
+}
