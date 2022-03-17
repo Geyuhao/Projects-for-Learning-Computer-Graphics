@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<script type="text/javascript">
+var gl;
+var canvas;
+var shaderProgram;
+var vertexArrayObject;
+var vertexBuffer;
+
+
+/**
+ * Creates a WebGL 2.0 context.
+ * @param canvas The HTML5 canvas to attach the context to.
+ * @return The WebGL 2.0 context.
+ */
+function createGLContext(canvas) {
+  var context = null;
+  context = canvas.getContext("webgl2");
+  if (context) {
+    context.viewportWidth = canvas.width;
+    context.viewportHeight = canvas.height;
+  } else {
+    alert("Failed to create WebGL context!");
+  }
+  return context;
+}
+
+
+/**
+ * Creates a WebGLShader object representing GLSL code for a single shader
+ * stage.
+ * @param type The shader stage; either gl.VERTEX_SHADER or gl.FRAGMENT_SHADER.
+ * @param shaderSource The source code for the shader.
+ * @return The WebGLShader object created.
+ */
+function loadShader(type, shaderSource) {
+  var shader = gl.createShader(type);
+  gl.shaderSource(shader, shaderSource);
+  gl.compileShader(shader);
+  
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      alert("Error compiling shader" + gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);   
+      return null;
+  }
+  return shader;  
+}
+
+
+/**
+ * Sets up the shader program that will run on the GPU.
+ */
+function setupShaders() {
+  // Source code for a simple vertex shader. Does no transformations.
+  var vertexShaderSource = 
+    "#version 300 es                                \n"+
+    "in vec3 aVertexPosition;                       \n"+
+    "void main() {                                  \n"+
+    "  gl_Position = vec4(aVertexPosition, 1.0);    \n"+
+    "}                                              \n";           
+   
+  // Source code for a simple fragment shader that colors everything white.
+  var fragmentShaderSource = 
+    "#version 300 es                                \n"+
+    "precision mediump float;                       \n"+
+    "out vec4 fragColor;                            \n"+
+    "void main() {                                  \n"+
+    "  fragColor = vec4(0.5, 0.2, 1.0, 1.0);        \n"+
+    "}                                              \n";
+
+
+    
+     
+  // Create shader objects and compile each of those shaders.
+  var vertexShader = loadShader(gl.VERTEX_SHADER, vertexShaderSource);
+  var fragmentShader = loadShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+  
+  // Link the shaders together into a program.
+  shaderProgram = gl.createProgram();
+  gl.attachShader(shaderProgram, vertexShader);
+  gl.attachShader(shaderProgram, fragmentShader);
+  gl.linkProgram(shaderProgram);
+  if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+    alert("Failed to link shader program");
+  }
+
+  // We only use one shader program for this example, so we can just bind
+  // it as the current program here.
+  gl.useProgram(shaderProgram);
+
+  // Create the vertex array object, which holds a list of attributes.
+  // Attributes contain data that applies to a specific vertex.
+  vertexArrayObject = gl.createVertexArray();
+  gl.bindVertexArray(vertexArrayObject);
+
+  // Query the index of the vertex position attribute in the list of attributes
+  // maintained by the GPU.
+  shaderProgram.vertexPositionLoc = 
+    gl.getAttribLocation(shaderProgram, "aVertexPosition");
+
+  // We must enable each individual attribute we are using.
+  gl.enableVertexAttribArray(shaderProgram.vertexPositionLoc);
+}
+
+
+/**
+ * Sets up the buffer to hold the triangle vertices.
+ */
+function setupBuffers() {
+  // Create a buffer, and bind it to the vertex array object.
+  vertexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+  // Define a triangle in clip coordinates.
+  var triangleVertices = [
+        -1.0, -1.0,  0.0,
+        -0.8,  0.9,  0.0,
+         0.5, -0.2,  0.0
+  ];
+  // Send the vertex data to the buffer.
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices),
+                gl.STATIC_DRAW);
+  vertexBuffer.itemSize = 3;
+  vertexBuffer.numberOfItems = 3;
+
+  // Binds the buffer that we just made to the vertex position attribute.
+  gl.vertexAttribPointer(shaderProgram.vertexPositionLoc, 
+                         vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+}
+
+
+/**
+ * Renders the image on the screen.
+ */
+function draw() {
+  // Transform the clip coordinates so the render fills the canvas dimensions.
+  gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+
+  // Clear the screen.
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  
+  gl.bindVertexArray(vertexArrayObject);
+  
+  // Render triangles.
+  gl.drawArrays(gl.TRIANGLES, 0, vertexBuffer.numberOfItems);
+
+  // Unbind the vertex array object.
+  gl.bindVertexArray(null);
+}
+
+/**
+ * Entrypoint into the renderer.
+ * Runs some initialization code, and then draws a still image to the canvas.
+ */
+function startup() {
+  canvas = document.getElementById("myGLCanvas");
+  gl = createGLContext(canvas);
+  setupShaders(); 
+  setupBuffers();
+  gl.clearColor(1.0, 1.0, 0.0, 0.7);
+  draw();  
+}
+</script>
+
+<head>
+  <title>Hello Triangle</title>
+  <link href="test.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Tangerine" rel="stylesheet">
+  <link rel="icon_myself" href="icon.png">
+  <meta name="author" content="Yuhao Ge">
+  <meta name="description" content="The MDN Web Docs site
+  provides information about Open Web technologies
+  including HTML, CSS, and APIs for both Web sites and
+  progressive web apps.">
+</head>
+
+<body onload="startup();">
+  <!-- 4 heading levels: -->
+  <h1>The Crushing Bore </h1>
+
+  <p>By Chris Mills</p>
+  
+  <h2>Chapter 1: <em>dark night</em></h2>
+  
+  <p>It was a dark <b>Somewhere, an owl hooted.</b> <i>rain lashed </i> <u>on the ...</u></p>
+  
+  <h2>Chapter 2: The eternal silence</h2>
+  
+  <p>Our protagonist could not so much as a whisper out of the shadowy figure ...</p>
+  
+  <h3>The specter speaks</h3>
+  
+  <p>Several more hours had passed, when all of a sudden the specter sat bolt upright and exclaimed, "Please have mercy on my soul!"</p>
+
+  <p>
+    At <a href="https://www.mozilla.org/en-US/about/manifesto/" title="The Mozilla homepage" target="_blank">
+        Mozilla Manifesto</a>, we’re a <strong>global</strong> community of
+  </p>
+
+  <input type="text" disabled>
+  <input type="text">
+
+  <ol>
+    <li>technologists</li>
+    <li>thinkers</li>
+  </ol>
+
+  <dl>
+    <dt>Cate</dt>
+    <dd>abc is a </dd>
+    <dd>cba can also be</dd>
+  </dl>
+
+  <ul>
+    <li>builders</li>
+  </ul>
+
+  <p>working together ... </p>
+
+  <table>
+    <tr>
+      <td>&nbsp;</td>
+      <th>Knocky</th>
+      <th>Flor</th>
+      <td>Ella</td>
+      <td>Juan</td>
+    </tr>
+    <tr style="background-color: yellow">
+      <td>Breed</td>
+      <td>Jack Russell</td>
+      <td>Poodle</td>
+      <td>Streetdog</td>
+      <td>Cocker Spaniel</td>
+    </tr>
+    <tr>
+      <td>Age</td>
+      <td>16</td>
+      <td>9</td>
+      <td>10</td>
+      <td>5</td>
+    </tr>
+  </table>
+
+  <canvas id="myGLCanvas" width="500" height="500"></canvas>
+</body>
+
+</html>

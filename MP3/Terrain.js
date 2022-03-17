@@ -379,7 +379,7 @@ class Terrain {
     drawEdges() {
         gl.bindVertexArray(this.vertexArrayObject);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.edgeIndexBuffer);
-        gl.drawElements(gl.LINES, this.edgeIndexBuffer.numItems,
+        gl.drawElements(gl.S, this.edgeIndexBuffer.numItems,
                         gl.UNSIGNED_INT,0);   
     }
 

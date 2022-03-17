@@ -127,7 +127,7 @@ void main(void) {
     // add the fog information
     float fogDistance = (gl_FragCoord.z / gl_FragCoord.w) * (gl_FragCoord.z / gl_FragCoord.w);
     vec4 fogColor = vec4(0.7, 0.7, 0.7, 1);
-    float fogDensity = 0.3;
+    float fogDensity = 0.5;
     float fogAmount = 1.0 - exp2(-fogDensity * fogDensity * fogDistance * fogDistance * LOG2);
     fogAmount = clamp(fogAmount, 0.0, 1.0);
     fragmentColor = mix(color, fogColor, fogAmount);
@@ -140,40 +140,56 @@ void main(void) {
     <h1>CS418 MP3: Simulating Flight</h1>
     <h3>By Ge Yuhao</p>
 
-    <canvas id="glCanvas" width="1300" height="500"></canvas>
+    <canvas id="glCanvas" width="1200" height="480"></canvas>
 
     <form id="Instructions" class="left">
         <fieldset>
             <legend>Instructions</legend>
-            <div>Rolling:  A, B </div>
-            <div>Pitching: W, S </div>
+            <div>Roll:  A, D </div>
+            <div>Pitch: W, S </div>
             <div>Speed:    +, - </div>
             <div>Go back:  `</div>
         </fieldset>
     </form>
 
     <form id="input_form">
-        <fieldset>
+        <fieldset class="right">
             <legend>Rendering Options</legend>
             <div>
                 <input type="radio" name="primitive" id="wireframe" value="wireframe"> Wireframe
-                <input type="radio" name="primitive" id="polygon" value="polygon" checked> Polygon
-                <input type="radio" name="primitive" id="wirepoly" value="wirepoly" > Polygon with Edges
-                <input id="Generate" type="button" value="Generate Map" onclick="regenerate();" />
             </div>
-        </fieldset>
-        
-        <fieldset>
-            <legend>Fog Options</legend>
+            <div>
+                <input type="radio" name="primitive" id="polygon" value="polygon" checked> Polygon
+            </div>
+            <div>
+                <input type="radio" name="primitive" id="wirepoly" value="wirepoly" > Polygon with Edges
+            </div>
             <div>
                 <input type="checkbox" id="fog" name="fog" checked>
                 <label for="fog">Enable Fog</label>
             </div>
+            <div>
+                <input id="Generate" type="button" value="Regenerate Map" onclick="regenerate();" />
+            </div>
         </fieldset>
     </form>
 
-
-
+    <div>
+        <fieldset>
+            <legend>Secret chat box</legend>
+            <form action="user" method="POST">
+                <div>
+                    <label for="Name">Name</label>
+                    <input type="text" class="form-control col-lg-9" id="name" placeholder="Name (Could be none)" name="name">
+                </div> 
+                <div>
+                    <label for="message">Message</label>
+                    <input type="text" class="form-control col-lg-9" id="message" placeholder="Anything want to say" name="message">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </fieldset>
+    </div>
     
 </body>
 

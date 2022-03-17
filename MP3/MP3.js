@@ -386,10 +386,10 @@ function update_view(){
   if (keys["="] && accelerate < 0.001) accelerate += 0.00005;
   if (keys["-"] && accelerate > -0.001) accelerate -= 0.00005;
   if (keys["`"]) initialize_view();
-  if (keys["w"]) eulerX -= 0.2;
-  if (keys["s"]) eulerX += 0.2;
-  if (keys["d"]) eulerY += 0.2;
-  if (keys["a"]) eulerY -= 0.2;
+  if (keys["w"] | keys["ArrowUp"]) eulerX -= 0.2;
+  if (keys["s"] | keys["ArrowDown"]) eulerX += 0.2;
+  if (keys["d"] | keys["ArrowRight"]) eulerY += 0.2;
+  if (keys["a"] | keys["ArrowLeft"]) eulerY -= 0.2;
   if (keys["ArrowLeft"]) eulerZ += 0.2;
   if (keys["ArrowRight"]) eulerZ -= 0.2;
 
