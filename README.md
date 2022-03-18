@@ -12,3 +12,8 @@ Welcome playing around at http://geyuhao.top
 <img width="600" height="400" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp3.gif"/>
 
 
+```HTML
+<video width="320" height="240" controls>
+    <source src="movie.mp4" type="video/mp4">
+</video>
+```
