@@ -85,6 +85,7 @@ in vec3 temp_kAmbient;
 in vec3 temp_kDiffuse;
 in vec3 vertexNormalView;
 in vec3 vertexPositionView;
+flat in int use_fog;
 
 out vec4 fragmentColor;
 
@@ -132,6 +133,11 @@ void main(void) {
     fogAmount = clamp(fogAmount, 0.0, 1.0);
     fragmentColor = mix(color, fogColor, fogAmount);
 
+    //if (use_fog==1) {
+    //    fragmentColor = mix(color, fogColor, fogAmount);
+    //  } else {
+    //    fragmentColor = color;
+    //  }
 }
 </script>
 

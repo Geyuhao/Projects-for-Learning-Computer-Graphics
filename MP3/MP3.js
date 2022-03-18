@@ -63,7 +63,7 @@ var camInitialDir = glMatrix.vec3.create();         //the camera's initial view 
 var camUP = glMatrix.vec3.create();     
 var camLook = glMatrix.vec3.create();
 var keys = {};
-
+var use_fog = 0;
 
 
 
@@ -219,6 +219,9 @@ function setupShaders() {
 
   shaderProgram.locations.minz = 
     gl.getUniformLocation(shaderProgram,"minz");
+
+  shaderProgram.locations.uniformuse_fog = 
+    gl.getUniformLocation(shaderProgram, "use_fog");
 }
 
 /**
@@ -250,6 +253,10 @@ function draw() {
   setLightUniforms(ambientLightColor, diffuseLightColor, specularLightColor,
                    lightPosition);
   setZUniforms(myTerrain.maxz, myTerrain.minz);
+  setuse_fogUinform(use_fog);
+
+  // console.log(shaderProgram.locations.use_fog);
+  // console.log(shaderProgram.locations.minz);
   
   // Draw the triangles, the wireframe, or both, based on the render selection.
   if (document.getElementById("polygon").checked) { 
@@ -274,7 +281,18 @@ function draw() {
   {
       //update a uniform variable to let 
       //fragment shader know whether or not to fog
+      use_fog = 1;
+  } else{
+      use_fog = 0;
   }
+}
+
+/**
+ * Send use_fog to the shader
+ * @param {Bool} use_fog 
+ */
+function setuse_fogUinform(use_fog) {
+  gl.uniform1i(shaderProgram.locations.uniformuse_fog, use_fog);
 }
 
 
