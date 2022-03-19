@@ -33,7 +33,9 @@ uniform mat4 projectionMatrix;
 uniform mat3 normalMatrix;
 uniform float minz;
 uniform float maxz;
+uniform vec3 lightPosition;
 
+out vec3 lightPositionView;
 out vec3 vertexPositionView;
 out vec3 vertexNormalView;
 out vec3 temp_kDiffuse;
@@ -59,7 +61,8 @@ void main(void) {
     }
 
     // Transform the vertex position and normal to view coordinates
-    vertexPositionView =(modelViewMatrix * vec4(vertexPosition, 1.0)).xyz;
+    vertexPositionView = (modelViewMatrix * vec4(vertexPosition, 1.0)).xyz;
+    lightPositionView = (modelViewMatrix * vec4(lightPosition, 1.0)).xyz;
     vertexNormalView = normalize(normalMatrix * vertexNormal);
 
     gl_Position =
@@ -85,11 +88,11 @@ in vec3 temp_kAmbient;
 in vec3 temp_kDiffuse;
 in vec3 vertexNormalView;
 in vec3 vertexPositionView;
-flat in int use_fog;
+in vec3 lightPositionView;
 
 out vec4 fragmentColor;
 
-uniform vec3 lightPosition;
+uniform int use_fog;
 uniform vec3 kAmbient;
 uniform vec3 kDiffuse;
 uniform vec3 kSpecular;
@@ -107,7 +110,7 @@ void main(void) {
     vec3 cameraPositionView = vec3(1.0, 1.0, 0.0);
     
     // Calculate the three other vectors we need: l, r, and v
-    vec3 lightVector = normalize(lightPosition - vertexPositionView);
+    vec3 lightVector = normalize(lightPositionView - vertexPositionView);
     vec3 reflectionVector = normalize(reflect(-lightVector, vertexNormalView));
     vec3 viewVector = normalize(cameraPositionView - vertexPositionView);
 
@@ -128,16 +131,16 @@ void main(void) {
     // add the fog information
     float fogDistance = (gl_FragCoord.z / gl_FragCoord.w) * (gl_FragCoord.z / gl_FragCoord.w);
     vec4 fogColor = vec4(0.7, 0.7, 0.7, 1);
-    float fogDensity = 0.5;
+    float fogDensity = 0.4;
     float fogAmount = 1.0 - exp2(-fogDensity * fogDensity * fogDistance * fogDistance * LOG2);
     fogAmount = clamp(fogAmount, 0.0, 1.0);
     fragmentColor = mix(color, fogColor, fogAmount);
 
-    //if (use_fog==1) {
-    //    fragmentColor = mix(color, fogColor, fogAmount);
-    //  } else {
-    //    fragmentColor = color;
-    //  }
+    if (use_fog==1) {
+        fragmentColor = mix(color, fogColor, fogAmount);
+      } else {
+        fragmentColor = color;
+      }
 }
 </script>
 

@@ -35,13 +35,13 @@ var kAmbient = [1.0, 1.0, 1.0];
 /** @global Diffuse material color/intensity for Phong reflection */
 var kDiffuse = [0.8, 0.8, 0.8];
 /** @global Specular material color/intensity for Phong reflection */
-var kSpecular = [0.05, 0.05, 0.05];
+var kSpecular = [0.15, 0.15, 0.15];
 /** @global Shininess exponent for Phong reflection */
 var shininess = 2;
 
 // Light parameters
-/** @global Light position in VIEW coordinates */
-var lightPosition = [1, 1, 2];
+/** @global Light position in GLOBAL coordinates */
+var lightPosition = [1, 0, 0.5];
 /** @global Ambient light color/intensity for Phong reflection */
 var ambientLightColor = [0.3, 0.3, 0.3];
 /** @global Diffuse light color/intensity for Phong reflection */
@@ -288,8 +288,8 @@ function draw() {
 }
 
 /**
- * Send use_fog to the shader
- * @param {Bool} use_fog 
+ * Send flag signal to the shader
+ * @param {int} use_fog 
  */
 function setuse_fogUinform(use_fog) {
   gl.uniform1i(shaderProgram.locations.uniformuse_fog, use_fog);
@@ -404,10 +404,10 @@ function update_view(){
   if (keys["="] && accelerate < 0.001) accelerate += 0.00005;
   if (keys["-"] && accelerate > -0.001) accelerate -= 0.00005;
   if (keys["`"]) initialize_view();
-  if (keys["w"] | keys["ArrowUp"]) eulerX -= 0.2;
-  if (keys["s"] | keys["ArrowDown"]) eulerX += 0.2;
-  if (keys["d"] | keys["ArrowRight"]) eulerY += 0.2;
-  if (keys["a"] | keys["ArrowLeft"]) eulerY -= 0.2;
+  if (keys["w"] | keys["ArrowUp"]) eulerX -= 0.4;
+  if (keys["s"] | keys["ArrowDown"]) eulerX += 0.4;
+  if (keys["d"] | keys["ArrowRight"]) eulerY += 0.4;
+  if (keys["a"] | keys["ArrowLeft"]) eulerY -= 0.4;
   if (keys["ArrowLeft"]) eulerZ += 0.2;
   if (keys["ArrowRight"]) eulerZ -= 0.2;
 
@@ -443,7 +443,6 @@ function update_view(){
 
   // update the look at point
   glMatrix.vec3.add(camLook,camPosition,deltaPosition);
-
 }
 
 
