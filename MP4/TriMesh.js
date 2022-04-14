@@ -59,9 +59,9 @@ class TriMesh{
     */
     getAABB(minXYZ,maxXYZ){
        for(var j=0;j<3;j++){    
-                minXYZ[0+j]= this.minXYZ[0+j];
-                maxXYZ[0+j]= this.maxXYZ[0+j];  
-             }     
+            minXYZ[0+j]= this.minXYZ[0+j];
+            maxXYZ[0+j]= this.maxXYZ[0+j];  
+        }     
     }
     
    /**
@@ -101,6 +101,27 @@ class TriMesh{
     loadFromOBJ(fileText)
     {    
         //Your code here
+
+        var v_counter = 0;
+        var f_counter = 0;
+        var fileText = fileText.split("\n");
+        for (var i=0; i < fileText.length; i++){
+            var line = fileText[i].split(/\b\s+(?!$)/);
+            var type = line[0];
+            if (type == "v" | type == "f"){
+                var x = line[1];
+                var y = line[2];
+                var z = line[3];
+                if (type == "v"){
+                    this.setVertex(v_counter,x,y,z);
+                    v_counter ++;
+                } else{
+                    this.setTriangle(f_counter,x-1,y-1,z-1);
+                    f_counter ++;
+                }
+            }
+        }
+
         
         this.numVertices = this.vBuffer.length / 3;
         this.numFaces = this.fBuffer.length / 3;  
@@ -256,7 +277,7 @@ class TriMesh{
     
     /**
     * Set the x,y,z coords of a vertex at location id
-    * @param {number} the index of the vertex to set 
+    * @param {number} id index of the vertex to set 
     * @param {number} x coordinate
     * @param {number} y coordinate
     * @param {number} z coordinate
@@ -266,6 +287,20 @@ class TriMesh{
         this.vBuffer[vid]=x;
         this.vBuffer[vid+1]=y;
         this.vBuffer[vid+2]=z;
+    }
+
+    /**
+    * Set the x,y,z coords of a vertex at location id
+    * @param {number} id index of the triangle to set 
+    * @param {number} x coordinate
+    * @param {number} y coordinate
+    * @param {number} z coordinate
+    */
+    setTriangle(id,x,y,z){
+        var vid = 3*id;
+        this.fBuffer[vid]=x;
+        this.fBuffer[vid+1]=y;
+        this.fBuffer[vid+2]=z;
     }
 
     /**
@@ -297,11 +332,11 @@ class TriMesh{
         {
             // Get vertex coodinates
             var v1 = this.fBuffer[3*i]; 
-            var v1Vec = glMatrix.vec3.fromValues(this.vBuffer[3*v1], this.vBuffer[3*v1+1],                                           this.vBuffer[3*v1+2]);
+            var v1Vec = glMatrix.vec3.fromValues(this.vBuffer[3*v1], this.vBuffer[3*v1+1], this.vBuffer[3*v1+2]);
             var v2 = this.fBuffer[3*i+1]; 
-            var v2Vec = glMatrix.vec3.fromValues(this.vBuffer[3*v2], this.vBuffer[3*v2+1],                                           this.vBuffer[3*v2+2]);
+            var v2Vec = glMatrix.vec3.fromValues(this.vBuffer[3*v2], this.vBuffer[3*v2+1], this.vBuffer[3*v2+2]);
             var v3 = this.fBuffer[3*i+2]; 
-            var v3Vec = glMatrix.vec3.fromValues(this.vBuffer[3*v3], this.vBuffer[3*v3+1],                                           this.vBuffer[3*v3+2]);
+            var v3Vec = glMatrix.vec3.fromValues(this.vBuffer[3*v3], this.vBuffer[3*v3+1], this.vBuffer[3*v3+2]);
             
            // Create edge vectors
             var e1=glMatrix.vec3.create();
@@ -338,10 +373,46 @@ class TriMesh{
     * T translates so that the AABB is at the origin
     * S scales uniformly by 1/L where L is the longest side of the AABB
     */    
-    
     canonicalTransform(){
-      //Your code here
-     
+        //Your code here
+        var center_x, center_y, center_z;
+
+        // console.log(this.maxXYZ,this.minXYZ);
+
+        center_x = (this.maxXYZ[0] + this.minXYZ[0])/2;
+        center_y = (this.maxXYZ[1] + this.minXYZ[1])/2;
+        center_z = (this.maxXYZ[2] + this.minXYZ[2])/2;   
+
+        // console.log(center_x,center_y,center_z);
+
+        // var center = glMatrix.vec3.fromValues(center_x,center_y,center_z);
+        var neg_center = glMatrix.vec3.fromValues(-center_x,-center_y,-center_z);
+        var l = Math.max(this.maxXYZ[0] - this.minXYZ[0], this.maxXYZ[1] - this.minXYZ[1], this.maxXYZ[2] - this.minXYZ[2]);
+
+        console.log("L is",l);
+
+        var S = glMatrix.mat4.create();
+        var T = glMatrix.mat4.create();
+        glMatrix.mat4.identity(T);
+        glMatrix.mat4.identity(S);
+
+        var resize = glMatrix.vec3.fromValues(1/l,1/l,1/l);
+        glMatrix.mat4.translate(T,T,neg_center);
+        glMatrix.mat4.scale(S,S,resize);
+
+        var ST = glMatrix.mat4.create();
+        glMatrix.mat4.multiply(ST, S, T);
+
+        console.log("S is", S);
+        console.log("T is", T);
+        console.log("ST is", ST);
+
+        var test = glMatrix.vec3.fromValues(3.2, -0.5, 0);
+        console.log(test);
+        glMatrix.vec3.transformMat4(test,test,ST);
+        console.log(test);
+
+        this.modelMatrix = ST;
     }
     
     /**

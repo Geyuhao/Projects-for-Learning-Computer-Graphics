@@ -6,9 +6,11 @@
 </head>
 
 <!-- If you add additional .js files, be sure to add them here. -->
+<link href="https://fonts.googleapis.com/css?family=Tangerine" rel="stylesheet">
 <script src="gl-matrix-min.js"></script>
 <script src="TriMesh.js"></script>
 <script src="MP4.js"></script>
+<link href="mp4.css" rel="stylesheet">
 
 <!-- MP2: Modify the shaders to implement Phong shading instead of Gourand! -->
 <script id="shader-vs" type="x-shader/x-vertex">#version 300 es
@@ -31,13 +33,13 @@ uniform mat3 normalMatrix;
 
 out vec3 fragPosition;
 out vec3 fragNormal;
-
+out vec2 v_texcoord;
 
 void main(void) {
     // Transform the vertex position and normal to view coordinates
     fragPosition =(modelViewMatrix * vec4(vertexPosition, 1.0)).xyz;
     fragNormal = normalize(normalMatrix * vertexNormal);
-
+    v_texcoord = vertexPosition.xy;
     
     gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);
 }
@@ -65,8 +67,11 @@ uniform vec3 ambientLightColor;
 uniform vec3 diffuseLightColor;
 uniform vec3 specularLightColor;
 
+uniform sampler2D u_texture;
+
 in vec3 fragPosition;
 in vec3 fragNormal;
+in vec2 v_texcoord;
 
 out vec4 fragmentColor;
 
@@ -89,10 +94,13 @@ void main(void) {
     float rDotV = max(dot(reflectionVector, viewVector), 0.0);
     float specularWeight = pow(rDotV, shininess);
 
+    // Sample the texture
+    vec4 texColor = texture(u_texture, v_texcoord);
+
     // Sum up all three lighting components into the color for the vertex,
     // and send it to the fragment shader.
-    fragmentColor = vec4((  kAmbient * ambientLightColor
-                        + kDiffuse * diffuseLightColor * diffuseWeight
+    fragmentColor = vec4(( texColor.rgb * ambientLightColor
+                        + texColor.rgb * diffuseLightColor * diffuseWeight
                         + kSpecular * specularLightColor * specularWeight), 1.0);
 
 }
@@ -100,18 +108,47 @@ void main(void) {
 
 
 <body onload="startup();">
-    <canvas id="glCanvas" width="1200" height="600"></canvas>
+    <h1>CS418 MP4: Texturing Mapping</h1>
+    <h3>By Ge Yuhao</p>
+    <canvas id="glCanvas" width="1600" height="600"></canvas>
 
-    <form id="input_form">
+    <form id="input_form" class="left">
         <fieldset>
             <legend>Rendering Options</legend>
             <div>
                 <input type="radio" name="primitive" id="wireframe" value="wireframe"> Wireframe
+            </div>
+            <div>
                 <input type="radio" name="primitive" id="polygon" value="polygon" checked> Polygon
+            </div>
+            <div>
                 <input type="radio" name="primitive" id="wirepoly" value="wirepoly" > Polygon with Edges
             </div>
         </fieldset>
     </form>
+
+    <form id="input_form" class="right">
+        <fieldset>
+            <legend>Texture Options</legend>
+            <div>
+                <input type="radio" name="primitive" id="brick1" value="brick1"checked> brick1
+            </div>
+            <div>
+                <input type="radio" name="primitive" id="brick2" value="brick2" > brick2
+            </div>
+            <div>
+                <input type="radio" name="primitive" id="brick3" value="brick3" > brick3
+            </div>
+        </fieldset>
+    </form>
+
+    <form id="Instructions" >
+        <fieldset>
+            <legend>Instructions</legend>
+            <div>Use mouse to move the view</div>
+        </fieldset>
+    </form>
+
 </body>
 
 </html>

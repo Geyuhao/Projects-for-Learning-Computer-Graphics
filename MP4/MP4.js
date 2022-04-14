@@ -61,6 +61,18 @@ var kEdgeBlack = [0.0, 0.0, 0.0];
 /** @global Edge color for white wireframe */
 var kEdgeWhite = [0.7, 0.7, 0.7];
 
+/** @global Image texture to mapped onto mesh */
+var texture;
+
+/** @global Is a mouse button pressed? */
+var isDown = false;
+/** @global Mouse coordinates */
+var x = -1;
+var y = -1;
+/** @global Accumulated rotation around X and Y in degrees */
+var rotX = 0;
+var rotY = 0;
+
 /**
  * Translates degrees to radians
  * @param {Number} degrees Degree input to function
@@ -80,12 +92,44 @@ function startup() {
   canvas = document.getElementById("glCanvas");
   gl = createGLContext(canvas);
 
+  canvas.addEventListener('mousedown', e => {
+    x = e.offsetX;
+    y = e.offsetY;
+    isDown = true;
+  });
+
+  canvas.addEventListener('mouseup', e => {
+    x = e.offsetX;
+    y = e.offsetY;
+    isDown = false;
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    if (isDown == true){
+      rotY = rotY + e.offsetY - y;
+      rotX = rotX + e.offsetX - x;
+    }
+    x = e.offsetX;
+    y = e.offsetY;
+  });
+
   // Compile and link the shader program.
   setupShaders();
 
   // Let the mesh object set up its own buffers.
   myMesh = new TriMesh();
   myMesh.readFile("teapot.obj");
+
+  // Load a texture
+  loadTexture("brick.jpg");
+  kSpecular = [227/255, 191/255, 76/255];
+
+  // Tell WebGL we want to affect texture unit 0
+  gl.activeTexture(gl.TEXTURE0);
+  // Bind the texture to texture unit 0
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  // Tell the shader we bound the texture to texture unit 0
+  gl.uniform1i(shaderProgram.locations.uSampler, 0); 
   
   // Generate the projection matrix using perspective projection.
   const near = 0.1;
@@ -95,10 +139,36 @@ function startup() {
                             near, far);
 
   // Set the background color to sky blue (you can change this if you like).
-  gl.clearColor(0.82, 0.93, 0.99, 1.0);
+  gl.clearColor(114/255, 166/255, 250/255, 1.0);   
 
   gl.enable(gl.DEPTH_TEST);
   requestAnimationFrame(animate);
+}
+
+/**
+ * Load a texture from an image.
+ */
+
+ function loadTexture(filename){
+	// Create a texture.
+	texture = gl.createTexture();
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+ 
+	// Fill the texture with a 1x1 blue pixel.
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+              new Uint8Array([0, 0, 255, 255]));
+ 
+	// Asynchronously load an image
+	// If image load unsuccessful, it will be a blue surface
+	var image = new Image();
+	image.src = filename;
+	image.addEventListener('load', function() {
+  		// Now that the image has loaded make copy it to the texture.
+  		gl.bindTexture(gl.TEXTURE_2D, texture);
+  		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
+  		gl.generateMipmap(gl.TEXTURE_2D);
+  		console.log("loaded ", filename);
+		});
 }
 
 
@@ -207,6 +277,8 @@ function setupShaders() {
   gl.getUniformLocation(shaderProgram, "diffuseLightColor");
   shaderProgram.locations.specularLightColor =
   gl.getUniformLocation(shaderProgram, "specularLightColor");
+  shaderProgram.locations.uSampler =
+    gl.getUniformLocation(shaderProgram, "u_texture");
 }
 
 /**
@@ -219,10 +291,16 @@ function draw() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   
   // Generate the view matrix using lookat.
+  var modelViewMatrix2 = glMatrix.mat4.create();
+  var temp = glMatrix.mat4.create();
+
   glMatrix.mat4.identity(modelViewMatrix);
+  console.log(rotY);
+  glMatrix.mat4.rotateY(modelViewMatrix , myMesh.getModelTransform(), degToRad(rotX));
+  glMatrix.mat4.rotateX(modelViewMatrix2, modelViewMatrix2, degToRad(rotY));
   glMatrix.mat4.lookAt(viewMatrix, eyePt, lookAtPt, up);
-  glMatrix.mat4.multiply(modelViewMatrix,  viewMatrix,myMesh.getModelTransform());
-    
+  glMatrix.mat4.multiply(temp, viewMatrix, modelViewMatrix2);
+  glMatrix.mat4.multiply(modelViewMatrix, temp, modelViewMatrix);
       
   setMatrixUniforms();
   setLightUniforms(ambientLightColor, diffuseLightColor, specularLightColor,
@@ -245,6 +323,17 @@ function draw() {
   else if (document.getElementById("wireframe").checked) {
     setMaterialUniforms(kEdgeBlack, kEdgeBlack, kEdgeBlack, shininess);
     myMesh.drawEdges(shaderProgram);
+  }
+
+  if (document.getElementById("brick1").checked) { 
+    loadTexture("brick.jpg");
+    kSpecular = [227/255, 191/255, 76/255];
+  } else if (document.getElementById("brick3").checked) { 
+    loadTexture("brick3.jpg");
+    kSpecular = [210/255, 105/255, 30/255];
+  } else if (document.getElementById("brick2").checked) { 
+    loadTexture("brick2.jpg");
+    kSpecular = [127/255, 91/255, 76/255];
   }
 }
 
