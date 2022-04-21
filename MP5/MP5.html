@@ -1,0 +1,116 @@
+<!DOCTYPE HTML> 
+<html lang="en"> 
+<head>
+<title>MP5: Physics!</title>
+<meta charset="utf-8"> 
+</head>
+
+<!-- If you add additional .js files, be sure to add them here. -->
+<link href="https://fonts.googleapis.com/css?family=Tangerine" rel="stylesheet">
+<script src="gl-matrix-min.js"></script>
+<script src="Sphere.js"></script>
+<script src="MP5.js"></script>
+<script src="instances.js"></script>
+<link href="mp5.css" rel="stylesheet">
+
+<!-- Modify to include diffuse material color as an attribute! -->
+<script id="shader-vs" type="x-shader/x-vertex">#version 300 es
+
+// Use high-precision floats if available on this device.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+
+in vec3 vertexPosition;
+in vec3 vertexNormal;
+
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat3 normalMatrix;
+
+out vec3 fragPosition;
+out vec3 fragNormal;
+
+void main(void) {
+    // Transform the vertex position and normal to view coordinates
+    fragPosition = (modelViewMatrix * vec4(vertexPosition, 1.0)).xyz;
+    fragNormal = normalize(normalMatrix * vertexNormal);
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);
+}
+</script>
+
+<!-- Fragment shader: does basic Blinn-Phong shading. -->
+<script id="shader-fs" type="x-shader/x-fragment">#version 300 es
+    
+// Use high-precision floats if available on this device.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+
+in vec3 fragPosition;
+in vec3 fragNormal;
+
+uniform vec3 kAmbient;
+uniform vec3 kDiffuse;
+uniform vec3 kSpecular;
+uniform float shininess;
+uniform vec3 lightPosition;
+uniform vec3 ambientLightColor;
+uniform vec3 diffuseLightColor;
+uniform vec3 specularLightColor;
+
+out vec4 fragColor;
+
+void main(void) {
+    vec3 nFragNormal = normalize(fragNormal);
+    vec3 lightDir = normalize(lightPosition - fragPosition);
+    vec3 viewDir = normalize(-fragPosition);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+
+    float diffuseWeight = max(dot(nFragNormal, lightDir), 0.0);
+    float specularWeight = pow(max(dot(nFragNormal, halfwayDir), 0.0), shininess);
+    
+    fragColor = vec4((  kAmbient * ambientLightColor
+                      + kDiffuse * diffuseLightColor * diffuseWeight
+                      + kSpecular * specularLightColor * specularWeight), 1.0);
+}
+</script>
+
+
+<body onload="startup();">
+    <h1>CS418 MP5: A Simple Physics Engine</h1>
+    <h3>By Ge Yuhao</p>
+    <canvas id="glCanvas" width="600" height="600"></canvas>
+
+    <form id="Instructions" class="left">
+        <fieldset>
+            <legend>Instructions</legend>
+            <div>Press Key W: Remove All </div>
+            <div>Press Key Q: Insert one </div>
+            Give a Burst: <input type="button" name="operations" id="burst" value="Burst" onclick="give_a_burst()">
+        </fieldset>
+    </form>
+
+    <form id="input_form" class="right">
+        <fieldset>
+            <legend>Parameters</legend>
+            <div>Gravity</div><div class="values" id="gravityValue">9.8</div>
+            <input type="range" name="parameters" id="gravity" max="20" min="-20" step="0.1" value="9.8">
+
+            <div>Drag</div><div class="values" id="dragValue">0.1</div>
+            <input type="range" name="parameters" id="drag" max="1" min="0" step="0.01" value="0.1">
+            
+            <div>Bounce</div><div class="values" id="bounceValue">0.9</div>
+            <input type="range" name="parameters" id="bounce" max="1" min="0" step="0.01" value="0.9">
+            
+          </fieldset>
+    </form>
+
+</body>
+
+</html>
