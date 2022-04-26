@@ -44,7 +44,7 @@ out vec3 temp_kAmbient;
 
 void main(void) {
     // map the color according to the normalized height
-    float  nrmZ = (vertexPosition.z - minz)/(maxz-minz);
+    float nrmZ = (vertexPosition.z - minz)/(maxz-minz);
 
     if (nrmZ < 0.35) {
         temp_kDiffuse = vec3(0.0, 0.0, 0.3);
