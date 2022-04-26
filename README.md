@@ -6,10 +6,10 @@ Welcome playing around at http://geyuhao33.web.illinois.edu/homepage/portfolio.h
 <img width="320" height="450" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp1.gif"/>
 
 ## MP2: Build a terrain using Faulting Method and Phong reflection model
-<img width="600" height="400" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp2.gif"/>
+<img width="300" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp2.gif"/>
 
 ## MP3: Rendering a view of the terrain from the perspective of someone flying over it
-<img width="600" height="400" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp3.png"/>
+<img width="300" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp3.png"/>
 
 ## MP4: Texture maping
-<img width="600" height="400" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp4.png"/>
+<img width="300" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp4.png"/>
