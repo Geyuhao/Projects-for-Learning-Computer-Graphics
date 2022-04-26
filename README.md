@@ -10,3 +10,6 @@ Welcome playing around at http://geyuhao33.web.illinois.edu/homepage/portfolio.h
 
 ## MP3: Rendering a view of the terrain from the perspective of someone flying over it
 <img width="600" height="400" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp3.png"/>
+
+## MP4: Texture maping
+<img width="600" height="400" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp4.png"/>
