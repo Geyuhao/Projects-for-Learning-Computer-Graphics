@@ -1,0 +1,215 @@
+<!DOCTYPE HTML> 
+<html lang="en"> 
+<head>
+<title>MP6: Shading for Technical Illustration</title>
+<meta charset="utf-8"> 
+</head>
+
+<!-- If you add additional .js files, be sure to add them here. -->
+<link href="https://fonts.googleapis.com/css?family=Tangerine" rel="stylesheet">
+<script src="gl-matrix-min.js"></script>
+<script src="TriMesh.js"></script>
+<script src="MP6.js"></script>
+<link href="mp6.css" rel="stylesheet">
+
+<!-- MP2: Modify the shaders to implement Phong shading instead of Gourand! -->
+<script id="shader-vs" type="x-shader/x-vertex">#version 300 es
+// Vertex Shader
+// Implements Phong shading. See the lecture on "Basic Shading" for details.
+
+// Use high-precision floats if available on this device.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+
+in vec3 vertexPosition;
+in vec3 vertexNormal;
+
+uniform int Silhouette;
+uniform int gooch;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat3 normalMatrix;
+uniform vec3 eyePt;
+uniform vec3 lightPosition;
+
+out vec3 fragPosition;
+out vec3 fragNormal;
+out vec2 v_texcoord;
+out vec4 color;
+
+void main(void) {
+    // Transform the vertex position and normal to view coordinates
+    fragPosition =(modelViewMatrix * vec4(vertexPosition, 1.0)).xyz;
+    fragNormal = normalize(normalMatrix * vertexNormal);
+    v_texcoord = vertexPosition.xy;
+    vec3 light =(modelViewMatrix * vec4(lightPosition, 1.0)).xyz;
+    
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);
+
+    vec3 temp = abs(fragPosition - eyePt);
+    float value = dot(temp, fragNormal);
+
+    color = vec4(1.0,1.0,1.0,1);
+
+    vec3 lightVector = normalize(light - fragPosition);
+    vec4 kblue = vec4(0,0,0.65,1);
+    vec4 kyellow = vec4(0.4,0.4,0,1);
+    float alpha = 0.35;
+    float beta = 0.4;
+    float para = (1.0+dot(lightVector, fragNormal))/2.0;
+    vec4 k_cool = kblue + alpha * color;
+    vec4 k_warm = kyellow + beta * color;
+
+    vec4 true_color = para * k_cool + (1.0-para) * k_warm;
+    
+
+    if (gooch==1){
+        if (Silhouette == 1){
+            if (value >= 1.1){
+                color = true_color;
+            } else{
+                color = vec4(0.0,0.0,0.0,1);
+            }
+        } else{
+            color = true_color;
+        }
+    } else{
+        if (Silhouette == 1){
+            if (value >= 1.0){
+                color = vec4(1.0,1.0,1.0,1);
+            } else{
+                color = vec4(0.0,0.0,0.0,1);
+            }
+        } else{
+            color = vec4(1.0,1.0,1.0,1);
+        }
+    }
+
+}
+</script>
+
+<!-- MP2: Modify the shaders to implement Phong shading instead of Gourand! -->
+<script id="shader-fs" type="x-shader/x-fragment">#version 300 es
+// Fragment Shader
+// Implements Phong shading. See the lecture on "Basic Shading" for details.
+
+// Use high-precision floats if available on this device.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+
+uniform vec3 kAmbient;
+uniform vec3 kDiffuse;
+uniform vec3 kSpecular;
+uniform float shininess;
+
+uniform vec3 lightPosition;
+uniform vec3 ambientLightColor;
+uniform vec3 diffuseLightColor;
+uniform vec3 specularLightColor;
+uniform mat4 modelViewMatrix;
+
+uniform sampler2D u_texture;
+
+in vec3 fragPosition;
+in vec3 fragNormal;
+in vec2 v_texcoord;
+in vec4 color;
+
+out vec4 fragmentColor;
+
+
+void main(void) {
+    // The camera is at the origin in view coordinates
+    vec3 cameraPositionView = vec3(0.0, 0.0, 0.0);
+    
+    vec3 nFragNormal = normalize(fragNormal);
+
+    vec3 light =(modelViewMatrix * vec4(lightPosition, 1.0)).xyz;
+
+    // Calculate the three other vectors we need: l, r, and v
+    vec3 lightVector = normalize(light - fragPosition);
+
+    vec3 reflectionVector = normalize(reflect(-lightVector, nFragNormal));
+    vec3 viewVector = normalize(cameraPositionView - fragPosition);
+
+    // Calculate diffuse light weighting: (n dot l)
+    float diffuseWeight = max(dot(nFragNormal, lightVector), 0.0);
+    
+    // Calculate the specular light weighting: (r dot v)^(shininess)
+    float rDotV = max(dot(reflectionVector, viewVector), 0.0);
+    float specularWeight = pow(rDotV, shininess);
+
+    // Sample the texture
+    // vec4 texColor = texture(u_texture, v_texcoord);
+
+    // added for extra
+    // vec4 texColor = vec4(1,1,1,1);
+
+    // Sum up all three lighting components into the color for the vertex,
+    // and send it to the fragment shader.
+
+    fragmentColor = vec4(( color.rgb * kAmbient
+                        + color.rgb * kDiffuse * diffuseWeight
+                        + specularLightColor * kSpecular * specularWeight), 1.0);
+
+}
+</script>
+
+
+<body onload="startup();">
+    <h1>CS418 MP6: Shading for Technical Illustration</h1>
+    <h3>By Ge Yuhao</p>
+    <canvas id="glCanvas" width="1600" height="600"></canvas>
+
+    <form id="input_form" class="left">
+        <fieldset>
+            <legend>Rendering Options</legend>
+            <div>
+                <input type="radio" name="primitive" id="wireframe" value="wireframe"> Wireframe
+            </div>
+            <div>
+                <input type="radio" name="primitive" id="polygon" value="polygon" checked> Polygon
+            </div>
+            <div>
+                <input type="radio" name="primitive" id="wirepoly" value="wirepoly" > Polygon with Edges
+            </div>
+        </fieldset>
+    </form>
+
+    <form id="input_form" class="right">
+        <fieldset>
+            <legend>Texture Options</legend>
+            <div>
+                <input type="radio" name="primitive" id="texture" value="texture"> Disable Gooch Shading
+            </div>
+            <div>
+                <input type="radio" name="primitive" id="Gooch" value="Gooch"checked> Enable Gooch Shading
+            </div>
+            <div>
+                <input type="checkbox" name="primitive" id="Silhouette" value="Silhouette"checked> Enable Silhouette Rendering
+            </div>
+        </fieldset>
+
+    </form>
+
+    <form id="Instructions" >
+        <fieldset>
+            <legend>Instructions</legend>
+            <div>Use mouse to move the view</div>
+        </fieldset>
+    </form>
+
+    <!-- <div>
+        <input type="checkbox" id="gooch" name="gooch" checked>
+        <label for="gooch">Enable Gooch Shading</label>
+    </div> -->
+
+</body>
+
+</html>
