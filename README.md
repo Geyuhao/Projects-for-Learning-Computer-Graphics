@@ -13,3 +13,9 @@ Welcome playing around at http://geyuhao33.web.illinois.edu/homepage/portfolio.h
 
 ## MP4: Texture maping
 <img width="300" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp4.png"/>
+
+## MP5: A simple particle system using WebGL
+<img width="300" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp5.jpg"/>
+
+## MP6: Shading for Technical Illustration
+<img width="300" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp6.jpg"/>
