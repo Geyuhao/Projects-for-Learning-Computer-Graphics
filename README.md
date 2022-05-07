@@ -9,13 +9,13 @@ Welcome playing around at http://geyuhao33.web.illinois.edu/homepage/portfolio.h
 <img width="300" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp2.gif"/>
 
 ## MP3: Rendering a view of the terrain from the perspective of someone flying over it
-<img width="300" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp3.png"/>
+<img width="350" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp3.png"/>
 
 ## MP4: Texture maping
 <img width="300" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp4.png"/>
 
 ## MP5: A simple particle system using WebGL
-<img width="300" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp5.jpg"/>
+<img width="350" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp5.jpg"/>
 
 ## MP6: Shading for Technical Illustration
-<img width="300" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp6.jpg"/>
+<img width="350" height="200" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp6.jpg"/>
