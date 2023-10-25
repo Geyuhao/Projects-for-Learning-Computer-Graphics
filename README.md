@@ -1,4 +1,6 @@
-# CS-418
+# Projects for Learning Computer Graphics
+
+Several course projects for UIUC CS 418 Computer Graphics
 
 Welcome playing around at [http://geyuhao33.web.illinois.edu/homepage/portfolio.html](https://geyuhao33.web.illinois.edu/home/portfolio)
 
