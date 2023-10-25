@@ -1,6 +1,6 @@
 # CS-418
 
-Welcome playing around at http://geyuhao33.web.illinois.edu/homepage/portfolio.html
+Welcome playing around at [http://geyuhao33.web.illinois.edu/homepage/portfolio.html](https://geyuhao33.web.illinois.edu/home/portfolio)
 
 ## MP1: Build an animation basing on WebGL
 <img width="320" height="450" src="https://github.com/Geyuhao/CS-418/blob/main/img/mp1.gif"/>
